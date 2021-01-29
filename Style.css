@@ -1,3 +1,31 @@
+#LEFT {
+	width: 50%; 
+	float: left;
+	height:100%;
+}
+
+#RIGHT {
+	width: 50%; 
+	float: left;
+	height:100%;
+}
+
+
+#LEFT_TOP {
+	width: 100%; 
+	float: left;
+	height:40%;
+
+}
+
+
+#LEFT_BOTTOM {
+	width: 100%; 
+	float: left;
+	height:60%;
+
+}
+
 .interact-sector{
 	height:100px;
 
@@ -5,8 +33,13 @@
 
 .status_content{
 	border-style:solid;
-	width:750px;
+	width:375px;
 	height:75px;
+
+}
+
+#my_mission_content{
+	height:375px;
 
 }
 
@@ -14,24 +47,47 @@ div {
 	font-family:"DFKai-SB";
 }
 
-#interact {
-	background-color: #F0FFFF;
-	width: 50%; 
-	float: left;
-	height:50%;
-}
-
-#status {
+#my_status {
 	background-color: #F0F8FF;
 	width: 50%; 
 	float: left;
-	height:50%;
+	height:100%;
 
 }
 
+#enemy_status {
+	background-color: #FFEBCD;
+	width: 50%; 
+	float: left;
+	height:100%;
+
+}
+
+
+#mission_sector{
+	background-color: #F0FFF0;
+	width: 50%; 
+	float: left;
+	height:100%;
+}
+
+#interact_sector {
+	background-color: #7FFFD4;
+	width: 50%; 
+	float: left;
+	height:100%;
+}
+
+
+
+
+
+
+
+
 #message {
 	background-color: #DCDCDC;
-	height:50%;
+	height:100%;
 	float: left;
 	width: 100%;
 	/*overflow:scroll;*/

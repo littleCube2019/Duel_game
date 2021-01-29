@@ -29,12 +29,107 @@
 
 
 	<body>
-	<!-- Display section below -->
-	<div> 
 	
-	<!-- all buttons or something user interaction below-->
+
+	<!-- Display section below -->
+	<div id="LEFT">
+	
+	
+
+    <!-- our status showing below-->
+	<!-- ==================================== -->
+		<div id="LEFT_TOP">
+		<!--屬性欄，此div為最外框-->
+    	<div id="my_status" >我方當前狀態 
+
+        <div id="my_basic-data">
+        	<!--基本數值-->
+			<div>回合數: 第<span id="turn"> 1 </span>回合</div>
+			<div>HP: <span id="my_atk"> 10 </span> </div>
+            <div>ATK: <span id="my_stamina">1</span> </div>
+			<div>DEF: <span id="my_health">1</span> </div>
+			<div>Critical: <span id="my_critical">50%</span> </div>
+			<div>Critical Damage: <span id="my_critical_hit">2</span> </div>
+        
+        </div>
+
+      
+		
+		<div id="my_sprite">精靈欄 空</div>
+	
+		<div id="my_sprite_content" class="status_content"></div>
+
+
+		<div id="my_item" >道具欄: 空</div>
+		
+		<div id="my_item_content" class="status_content"></div>
+		
+
+		
+	
+	    
+        </div> <!-- id=LEFT_TOP closing tag , this section ending here-->
+
+	<!-- all status showing above-->
 	<!-- ==================================== -->
 
+	
+	<!-- enemy status showing below-->
+	<!-- ==================================== -->
+
+		<!--屬性欄，此div為最外框-->
+    	<div id="enemy_status" >敵方當前狀態 
+
+        <div id="enemy_basic-data">
+        	<!--基本數值-->
+			<br>
+			<div>HP: <span id="enemy_hour"> 10 </span> </div>
+            <div>ATK: <span id="enemy_stamina">1</span> </div>
+			<div>DEF: <span id="enemy_health">1</span> </div>
+			<div>Critical: <span id="enemy_critical">50%</span> </div>
+			<div>Critical Damage: <span id="enemy_critical_hit">2</span> </div>
+        
+        </div>
+
+      
+		
+		<div id="enemy_sprite">精靈欄 空</div>
+	
+		<div id="enemy_sprite_content" class="status_content"></div>
+
+		<!--
+		<div id="enemy_item" >道具欄: 空</div>
+		
+		<div id="enemy_item_content" class="status_content"></div>
+		-->
+
+		
+	
+	    
+        </div> <!-- id=enemy_status closing tag -->
+
+        </div><!-- id=status closing tag , this section ending here-->
+	<!-- all status showing above-->
+	<!-- ==================================== -->
+
+
+
+	
+
+
+
+
+
+
+
+	<!-- all buttons or something user interaction below-->
+	<!-- ==================================== -->
+	<div id="LEFT_BOTTOM">
+		<div id="mission_sector">
+			<div id="my_mission">當前任務: 空</div>
+				
+			<div id="my_mission_content" class="status_content"></div>
+		</div> <!-- mission sector ending here-->
 	<!-- ''''''''''''''''''''''''''''''''''''''''''
 		Note: you can use this format:
 
@@ -46,7 +141,7 @@
 		to add new action button 
 		''''''''''''''''''''''''''''''''''''''''''  -->
 
-    	<div id="interact" >操作角色
+    	<div id="interact_sector" >操作角色
     		<div id="turn_action" class="interact-sector">
     		本回合行動，選擇完後此回合結束
 
@@ -87,67 +182,31 @@
 
 
     	</div> <!-- id=interact div closing tag, this section ending here  -->
+
+    </div> <!-- id=LEFT Bottom ending here-->
     <!-- all buttons or something user interaction above-->
 	<!-- ==================================== -->
 
+</div> <!-- id=LEFT  ending here-->
 
-
-
-
-	<!-- all status showing below-->
-	<!-- ==================================== -->
-
-		<!--屬性欄，此div為最外框-->
-    	<div id="status" >當前狀態 
-
-        <div id="basic-data">
-        	<!--基本數值-->
-			<div>回合數: 第<span id="day"> 1 </span>回合</div>
-			<div>HP: <span id="hour"> 10 </span> </div>
-            <div>ATK: <span id="stamina">1</span> </div>
-			<div>DEF: <span id="health">1</span> </div>
-			<div>Critical: <span id="lv">50%</span> </div>
-			<div>Critical Hit: <span id="lv">2</span> </div>
-        
-        </div>
-
-      
-		
-		<div id="sprite">精靈欄 空</div>
-	
-		<div id="sprite_content" class="status_content"></div>
-
-
-		<div id="item" >道具欄: 空</div>
-		
-		<div id="item_content" class="status_content"></div>
-		
-
-		<div id="mission">當前任務: 空</div>
-	
-		<div id="mission_content" class="status_content"></div>
-	
-	    
-        </div> <!-- id=status closing tag , this section ending here-->
-
-	<!-- all status showing above-->
-	<!-- ==================================== -->
-
-	
-
-
-		<!-- show message below--> 
+<div id="RIGHT">
+<!-- show message below--> 
 		<!-- ==================================== -->
-		message
-    	<p id="message"></p>
-        </div> 
+		
+    	<div id="message">message
+	<div style="background-color:#F0F8FF">Testing</div>
+
+    	</div>
+        
         
         <!-- show message above--> 
 		<!-- ==================================== -->
 
+</div> 
 
 
-	</body>
+
+</body>
 
 
 
