@@ -1,0 +1,44 @@
+.interact-sector{
+	height:100px;
+
+}
+
+.status_content{
+	border-style:solid;
+	width:750px;
+	height:75px;
+
+}
+
+div {
+	font-family:"DFKai-SB";
+}
+
+#interact {
+	background-color: #F0FFFF;
+	width: 50%; 
+	float: left;
+	height:50%;
+}
+
+#status {
+	background-color: #F0F8FF;
+	width: 50%; 
+	float: left;
+	height:50%;
+
+}
+
+#message {
+	background-color: #DCDCDC;
+	height:50%;
+	float: left;
+	width: 100%;
+	/*overflow:scroll;*/
+} 
+
+.interact-button{
+	/*float: left;*/
+	height:25px;
+	width: 70px;
+}

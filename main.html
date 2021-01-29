@@ -1,0 +1,154 @@
+<html>
+	<head>
+		<title>
+			Just a game
+
+		</title>
+		<!-- local file below -->
+		<!-- ==================================== -->
+		<!--our css file -->
+		<link rel='stylesheet' href='Style.css'>
+
+		<!-- our js file here-->
+		<script language="JavaScript" src="gameJS.js"></script>
+		<!-- ==================================== -->
+
+		<!-- module below-->
+		<!-- ==================================== -->
+		<!-- jquery -->
+		<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+		<!-- future socket.io here --> 
+		<!--<script src="/socket.io/socket.io.js"></script>-->
+		
+
+
+		<!-- ==================================== -->
+
+	</head>
+	
+
+
+	<body>
+	<!-- Display section below -->
+	<div> 
+	
+	<!-- all buttons or something user interaction below-->
+	<!-- ==================================== -->
+
+	<!-- ''''''''''''''''''''''''''''''''''''''''''
+		Note: you can use this format:
+
+		<div>
+    			<button id="action_atk" class="interact-button">  Action </button>
+    			Description
+    	</div>
+
+		to add new action button 
+		''''''''''''''''''''''''''''''''''''''''''  -->
+
+    	<div id="interact" >操作角色
+    		<div id="turn_action" class="interact-sector">
+    		本回合行動，選擇完後此回合結束
+
+    			<div>
+    			<button id="action_atk" class="interact-button"> 攻擊 </button>
+    			此回合攻擊對方，有機會造成爆擊
+    			</div>
+
+    			<div>
+				<button id="action_def" class="interact-button">防禦</button>
+				此回合提升50%防禦力
+				</div>
+    			
+			</div> <!-- turn_action 的closing tag-->
+
+			<div id="item_action" class="interact-sector">
+			道具欄操作<br>
+				<div>
+					<button id="item_use" class="interact-button">使用道具</button>
+					使用當前道具欄的道具
+				</div>
+
+				<div>
+				<button id="item_discard" class="interact-button">丟棄道具</button>
+				丟棄當前道具欄的道具
+				</div>
+			</div> <!-- item_action 的closing tag-->
+
+			<div id="misson_action" class="interact-sector">任務操作
+    			<div>
+					<button id="misson_discard" class="interact-button">放棄任務</button>
+					放棄執行當前任務
+				</div>
+
+    		</div> <!-- id= mission_action 的closing tag-->
+
+    		
+
+
+    	</div> <!-- id=interact div closing tag, this section ending here  -->
+    <!-- all buttons or something user interaction above-->
+	<!-- ==================================== -->
+
+
+
+
+
+	<!-- all status showing below-->
+	<!-- ==================================== -->
+
+		<!--屬性欄，此div為最外框-->
+    	<div id="status" >當前狀態 
+
+        <div id="basic-data">
+        	<!--基本數值-->
+			<div>回合數: 第<span id="day"> 1 </span>回合</div>
+			<div>HP: <span id="hour"> 10 </span> </div>
+            <div>ATK: <span id="stamina">1</span> </div>
+			<div>DEF: <span id="health">1</span> </div>
+			<div>Critical: <span id="lv">50%</span> </div>
+			<div>Critical Hit: <span id="lv">2</span> </div>
+        
+        </div>
+
+      
+		
+		<div id="sprite">精靈欄 空</div>
+	
+		<div id="sprite_content" class="status_content"></div>
+
+
+		<div id="item" >道具欄: 空</div>
+		
+		<div id="item_content" class="status_content"></div>
+		
+
+		<div id="mission">當前任務: 空</div>
+	
+		<div id="mission_content" class="status_content"></div>
+	
+	    
+        </div> <!-- id=status closing tag , this section ending here-->
+
+	<!-- all status showing above-->
+	<!-- ==================================== -->
+
+	
+
+
+		<!-- show message below--> 
+		<!-- ==================================== -->
+		message
+    	<p id="message"></p>
+        </div> 
+        
+        <!-- show message above--> 
+		<!-- ==================================== -->
+
+
+
+	</body>
+
+
+
+</html>
