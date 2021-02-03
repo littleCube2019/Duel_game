@@ -19,17 +19,102 @@
 		<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
 		<!-- future socket.io here --> 
 		<!--<script src="/socket.io/socket.io.js"></script>-->
-		
-
+		<script src="/socket.io/socket.io.js"></script>
+    	<script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
 
 		<!-- ==================================== -->
-
 	</head>
 	
+	<script>
+		let socket = io();
+		var num_message = 0;
+		var MAX_MESSAGE = 22;
+		function addMessage(Text){
+			if(num_message>= MAX_MESSAGE){
+				$("#message div:nth-child(1)").remove();
+			}
 
+			if(num_message %2 ==0){
+				$("#message").append("<div style=\"background-color:#F0F8FF\">"+Text+"</div>");
+			} 
+			else{
+				$("#message").append("<div style=\"background-color:#DCDCDC\">"+Text+"</div>");
+			}
+			num_message+=1;
+		}
+		socket.on("welcome",()=>{
+			$("#LEFT").hide();
+			$("#RIGHT").hide();
+		})
+		socket.on("pl1_choosed", ()=>{
+			$("#pl1").hide();
+		})
+		socket.on("pl2_choosed", ()=>{
+			$("#pl2").hide();
+		})
+		socket.on("start_game", (hp, atk, def, crit)=>{
+			$("#choose_pl").hide();
+			$("#LEFT").show();
+			$("#RIGHT").show();
+			$("#my_hp").text(hp);
+			$("#my_atk").text(atk);
+			$("#my_def").text(def);
+			$("#my_crit").text(crit*100 + "%");
+			$("#enemy_hp").text(hp);
+			$("#enemy_atk").text(atk);
+			$("#enemy_def").text(def);
+			$("#enemy_crit").text(crit*100 + "%");
+		})
+		socket.on("update", (p1_hp, p2_hp, msg1, msg2)=>{
+			if(id==1){
+				$("#my_hp").text(p1_hp);
+				$("#enemy_hp").text(p2_hp);
+				addMessage("你對敵方" + msg2);
+				addMessage("敵方對你" + msg1);
+			}else if(id==2){
+				$("#my_hp").text(p2_hp);
+				$("#enemy_hp").text(p1_hp);
+				addMessage("你對敵方" + msg1);
+				addMessage("敵方對你" + msg2);
+			}
+		})
+
+		socket.on("act_ready", (type)=>{
+			addMessage("你選擇了" + type);
+		})
+
+		$(document).ready(()=>{
+			$("#pl1").click(()=>{
+				id = 1;
+				$("#pl1").hide();
+				$("#pl2").hide();
+				$("#pl").text("你是玩家1");
+				socket.emit("choose", 1);
+			});
+			$("#pl2").click(()=>{
+				id = 2;
+				$("#pl1").hide();
+				$("#pl2").hide();
+				$("#pl").text("你是玩家2");
+				socket.emit("choose", 2);
+			});
+			$("#action_atk").click(()=>{
+				socket.emit("action", "atk", id);
+			});
+			$("#action_def").click(()=>{
+				socket.emit("action", "def", id);
+			});
+		});
+	</script>
 
 	<body>
 	
+	<div id="choose_pl">
+		<p id="pl">請選擇角色</p>
+		<button id="pl1">player1</button>
+      	<button id="pl2">player2</button>
+	</div>
+
 
 	<!-- Display section below -->
 	<div id="LEFT">
@@ -45,11 +130,11 @@
         <div id="my_basic-data">
         	<!--基本數值-->
 			<div>回合數: 第<span id="turn"> 1 </span>回合</div>
-			<div>HP: <span id="my_atk"> 10 </span> </div>
-            <div>ATK: <span id="my_stamina">1</span> </div>
-			<div>DEF: <span id="my_health">1</span> </div>
-			<div>Critical: <span id="my_critical">50%</span> </div>
-			<div>Critical Damage: <span id="my_critical_hit">2</span> </div>
+			<div>HP: <span id="my_hp">  </span> </div>
+            <div>ATK: <span id="my_atk"></span> </div>
+			<div>DEF: <span id="my_def"></span> </div>
+			<div>Critical: <span id="my_crit"></span> </div>
+			<div>Critical Damage: <span id="my_crit_dng">2</span> </div>
         
         </div>
 
@@ -83,11 +168,11 @@
         <div id="enemy_basic-data">
         	<!--基本數值-->
 			<br>
-			<div>HP: <span id="enemy_hour"> 10 </span> </div>
-            <div>ATK: <span id="enemy_stamina">1</span> </div>
-			<div>DEF: <span id="enemy_health">1</span> </div>
-			<div>Critical: <span id="enemy_critical">50%</span> </div>
-			<div>Critical Damage: <span id="enemy_critical_hit">2</span> </div>
+			<div>HP: <span id="enemy_hp">  </span> </div>
+            <div>ATK: <span id="enemy_atk"></span> </div>
+			<div>DEF: <span id="enemy_def"></span> </div>
+			<div>Critical: <span id="enemy_crit"></span> </div>
+			<div>Critical Damage: <span id="enemy_crit_dmg">2</span> </div>
         
         </div>
 
