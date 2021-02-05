@@ -39,6 +39,14 @@ $(function(){
 		$("#food").text(parseInt($("#food").text())+1);
 	})
 	
+	$("#action_atk").click(()=>{
+		socket.emit("action", "atk", id);
+		addMessage("你選擇了攻擊");
+	});
+	$("#action_def").click(()=>{
+		socket.emit("action", "def", id);
+		addMessage("你選擇了攻擊");
+	});
 
 
 })
