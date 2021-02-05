@@ -27,6 +27,9 @@
 	
 	<script>
 		let socket = io();
+		var round = 1;
+		
+		//message
 		var num_message = 0;
 		var MAX_MESSAGE = 22;
 		function addMessage(Text){
@@ -42,6 +45,8 @@
 			}
 			num_message+=1;
 		}
+
+		//選擇角色
 		socket.on("welcome",()=>{
 			$("#LEFT").hide();
 			$("#RIGHT").hide();
@@ -65,6 +70,8 @@
 			$("#enemy_def").text(def);
 			$("#enemy_crit").text(crit*100 + "%");
 		})
+
+		//更新每回合雙方血量
 		socket.on("update", (p1_hp, p2_hp, msg1, msg2)=>{
 			if(id==1){
 				$("#my_hp").text(p1_hp);
@@ -77,33 +84,48 @@
 				addMessage("你對敵方" + msg1);
 				addMessage("敵方對你" + msg2);
 			}
+			round += 1;
+			$("#round").text(round);
 		})
 
+		//顯示當回合選擇的行動
 		socket.on("act_ready", (type)=>{
 			addMessage("你選擇了" + type);
 		})
 
+
 		$(document).ready(()=>{
+			//選擇玩家
 			$("#pl1").click(()=>{
 				id = 1;
 				$("#pl1").hide();
 				$("#pl2").hide();
 				$("#pl").text("你是玩家1");
-				socket.emit("choose", 1);
+				socket.emit("choose_character", 1);
 			});
 			$("#pl2").click(()=>{
 				id = 2;
 				$("#pl1").hide();
 				$("#pl2").hide();
 				$("#pl").text("你是玩家2");
-				socket.emit("choose", 2);
+				socket.emit("choose_character", 2);
 			});
+
+			//選擇行動
 			$("#action_atk").click(()=>{
-				socket.emit("action", "atk", id);
+				socket.emit("choose_action", "atk", id);
 			});
 			$("#action_def").click(()=>{
-				socket.emit("action", "def", id);
+				socket.emit("choose_action", "def", id);
 			});
+
+			//選擇道具
+			$("#item_use").click(()=>{
+				socket.emit("choose_item", "use", id);
+			});
+			$("#item_discard").click(()=>{
+				socket.emit("choose_item", "delete", id);
+			})
 		});
 	</script>
 
@@ -129,12 +151,12 @@
 
         <div id="my_basic-data">
         	<!--基本數值-->
-			<div>回合數: 第<span id="turn"> 1 </span>回合</div>
+			<div>回合數: 第<span id="round"> 1 </span>回合</div>
 			<div>HP: <span id="my_hp">  </span> </div>
             <div>ATK: <span id="my_atk"></span> </div>
 			<div>DEF: <span id="my_def"></span> </div>
 			<div>Critical: <span id="my_crit"></span> </div>
-			<div>Critical Damage: <span id="my_crit_dng">2</span> </div>
+			<div>Critical Damage: <span id="my_crit_dng">x2</span> </div>
         
         </div>
 
@@ -259,6 +281,10 @@
     			<div>
 					<button id="misson_discard" class="interact-button">放棄任務</button>
 					放棄執行當前任務
+				</div>
+				<div>
+					<button id="pick_card" class="interact-button">抽卡</button>
+					隨機抽取一張卡片
 				</div>
 
     		</div> <!-- id= mission_action 的closing tag-->

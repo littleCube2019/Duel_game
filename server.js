@@ -13,16 +13,23 @@ http.listen(3000, function(){
 
 app.use(express.static('public'));
 
-var player1 = {"hp":10, "atk":1, "def":1, "crit_rate":0.5, "action":"none"};
-var player2 = {"hp":10, "atk":1, "def":1, "crit_rate":0.5, "action":"none"};
+var player1 = {"hp":10, "atk":1, "def":1, "crit_rate":0.5, "action":"none", 
+                "item":{"type":"none", "value":0},
+                "mission":{"type":"none", "value":"none", "reward_type":"none", "reward_value":"none", "discription":"none"}};
+var player2 = {"hp":10, "atk":1, "def":1, "crit_rate":0.5, "action":"none", 
+                "item":{"type":"none", "value":0},
+                "mission":{"type":"none", "value":"none", "reward_type":"none", "reward_value":"none", "discription":"none"}};
 var ready1 = false, ready2 = false;
+var act_ready1=false, act_ready2=false;
+var item_ready1 = false, item_ready2 = false;
 
 io.on('connection', (socket) => {
   socket.emit("welcome");
   console.log('Client connected');
   socket.on('disconnect', () => console.log('Client disconnected'));
 
-  socket.on("choose", (pl)=>{
+  //choose player
+  socket.on("choose_character", (pl)=>{
     if(pl==1){
       console.log("pl1 has been choosed");
       ready1 = true;
@@ -40,20 +47,21 @@ io.on('connection', (socket) => {
       console.log("start game");
     }
   });
-  socket.on("action", (type, id)=>{
-    
-    if(id==1 && !ready1){
+
+  //選擇行動 & 計算傷害 
+  socket.on("choose_action", (type, id)=>{
+    if(id==1 && !act_ready1){
       socket.emit("act_ready", type);
       player1.action = type;
-      ready1 = true;
+      act_ready1 = true;
       console.log("player1 ready");
-    }else if(id==2 && !ready2){
+    }else if(id==2 && !act_ready2){
       socket.emit("act_ready", type);
       player2.action = type;
-      ready2 = true;
+      act_ready2 = true;
       console.log("player2 ready");
     }
-    if(ready1 && ready2){
+    if(act_ready1 && act_ready2){
       var p1_atk, p1_def, p2_atk, p2_def;
       var crit;
       var msg1, msg2;
@@ -95,9 +103,36 @@ io.on('connection', (socket) => {
       }else{
         msg2 = "造成了" + 0 +"點傷害";
       }
-      ready1 = ready2 = false;
+      act_ready1 = act_ready2 = false;
       console.log("one round finished");
       io.emit("update", player1.hp, player2.hp, msg1, msg2);
+    }
+  })
+
+  //使用道具
+  socket.on("choose_item", (type, id)=>{
+    if(id==1 && !item_ready1){
+      item_ready1 = true;
+      if(type=="use"){
+        if(player1.item.type=="atk"){
+
+        }
+      }else if(type=="delete"){
+        player1.item.type = "none";
+        player2.item.value = 0;
+        socket.emit("delete_item");
+      }
+    }else if(id==2 && !item_ready2){
+      item_ready2 = true;
+      if(type=="use"){
+        if(player2.item.type=="atk"){
+
+        }
+      }else if(type=="delete"){
+        player2.item.type = "none";
+        player2.item.value = 0;
+        socket.emit("delete_item");
+      }
     }
   })
 });
