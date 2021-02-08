@@ -9,6 +9,10 @@ function canAcceptMission(player,mission){
 }
 
 
+function sumOfObj(obj) {
+  return Object.keys(obj).reduce((sum,key)=>sum+parseFloat(obj[key]||0),0);
+} //sum of object
+
 
 
 var mission = [
@@ -19,19 +23,19 @@ var mission = [
 		player.remaining = 3;
 	},
 	mission_check:(player,enemy)=>{
-		if(player.remaining==0){
-			mission_success(player,enemy);
-		}
-		else{
-			if(player.action=="def"){ //action == defend
-				player.remaining-=1;
+
+
+		if(player.action=="def"){ //action == defend
+			player.remaining-=1;
+			if(player.remaining==0){
+					this.mission_success(player,enemy);
 			}
 		}
-		
+				
 	},
 	mission_fail:(player,enemy)=>{ // when violate the rule, or *discard* 
 		player.remaining=0; 
-		player.mission=-1; //mission remove
+		player.mission=-1; //mssion remove
 	},
 	mission_success:(player,enemy)=>{
 		player.spike+=1;
@@ -45,14 +49,13 @@ var mission = [
 		player.remaining = 3;
 	},
 	mission_check:(player,enemy)=>{
-		if(player.remaining<0){
-			mission_success(player,enemy);
-		}
-		else{
-			player.remaining-=player.damageNoDef["spike"] ;
-			//造成三點荊棘害傷
-		}
 		
+		
+		player.remaining-=player.damageNoDef["spike"] ;
+		if(player.remaining<0){
+			this.mission_success(player,enemy);
+		}
+
 	},
 	mission_fail:(player,enemy)=>{ // when violate the rule, or *discard* 
 		player.remaining=0; 
@@ -70,15 +73,17 @@ var mission = [
 		player.remaining = 3;
 	},
 	mission_check:(player,enemy)=>{
-		if(player.remaining==0){
-			mission_success(player,enemy);
-		}
-		else{
-			if(player.action=="def"){ //action == defend
-				player.remaining-=1;
+		
+		
+		if(player.action=="def"){ //action == defend
+			player.remaining-=1;
+			if(player.remaining==0){
+				this.mission_success(player,enemy);
 			}
 		}
+			
 		
+	
 	},
 	mission_fail:(player,enemy)=>{ // when violate the rule, or *discard* 
 		player.remaining=0; 
@@ -96,27 +101,57 @@ var mission = [
 		player.remaining = 3;
 	},
 	mission_check:(player,enemy)=>{
-		if(player.remaining==0){
-			mission_success(player,enemy);
-		}
-		else{
+	
 			if(remaining==3){
 				if(player.action.basic=="def" ){ //action == defend
 					player.remaining-=1;
 				}
 				else{
-					mission_fail(player,enemy);
+					this.mission_fail(player,enemy);
 				}
 			}
 			else{
 				if(player.action.basic=="def" && player.prevAction =="def"){ //action == defend
 					player.remaining-=1;
+					if(player.remaining==0){
+						this.mission_success(player,enemy);
+					}
 				}
 				else{
-					mission_fail(player,enemy);
+					this.mission_fail(player,enemy);
 				}
 			}
-		}
+		
+		
+	},
+	mission_fail:(player,enemy)=>{ // when violate the rule, or *discard* 
+		player.remaining=0; 
+		player.mission=-1; //mission remove
+	},
+	mission_success:(player,enemy)=>{
+		player.def+=2;
+		player.mission=-1; //mission remove 
+	},
+},
+{
+	id:4,
+	preneed_id:[3],
+	mission_start:(player,enemy)=>{
+		player.remaining = 3;
+	},
+	mission_check:(player,enemy)=>{
+	
+			if sumOfObj(player.takenDamage>0){
+				this.mission_fail(player,enemy);
+			}
+
+			else{
+				player.remaining-=1;
+				if(player.remaining ==0){
+					this.mission_success(player,enemy);
+				}
+			}
+		
 		
 	},
 	mission_fail:(player,enemy)=>{ // when violate the rule, or *discard* 

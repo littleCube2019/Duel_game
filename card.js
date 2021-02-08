@@ -60,6 +60,8 @@ var card = [
 	回報:\
 	防禦力+3" 
 },
+]
+/* testing version
 {
 	id:1005,
 	type:"任務卡",
