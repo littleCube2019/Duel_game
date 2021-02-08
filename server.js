@@ -16,9 +16,9 @@ http.listen(3000, function(){
 app.use(express.static('public'));
 
 class player {
-	constructor(id){
+	constructor(playerId){
 			// 以一個基本初始玩家為預設值
-  this.id = id;  //區分玩家
+  this.id = playerId;  //區分玩家
   this.hp = 10; //血量 
   this.atk = 1; //攻擊力
   this.def = 1; //防禦力
@@ -67,11 +67,11 @@ class player {
     //需考慮對方防禦
     if(enemy.action=="def"){
       for(const k in this.DamageDef){
-        sumDef += (this.DamageDef[k]-enemy.def*1.5);
+        sumDef += Math.max(this.DamageDef[k]-enemy.def*1.5, 0);
       }
     }else{
       for(const k in this.DamageDef){
-        sumDef += (this.DamageDef[k]-enemy.def);
+        sumDef += Math.max(this.DamageDef[k]-enemy.def, 0);
       }
     }
 
@@ -92,8 +92,8 @@ class player {
 
   //判斷爆擊成功
   critical(){
-    var crit = Math.round(Math.random()*100);
-    if(crit<this.def*100){
+    var crit = Math.floor(Math.random()*100);
+    if(crit<this.crit_rate*100){
       this.isCritical = true;
     }else{
       this.isCritical = false;
@@ -138,12 +138,12 @@ io.on('connection', (socket) => {
   });
 
 
-  socket.on("action_done", (id, action, item)=>{
-    if(id==1 && !player1.actionReady){
+  socket.on("action_done", (playerId, action, item)=>{
+    if(playerId==1 && !player1.actionReady){
       player1.getAction(action, item);
       player1.actionReady = true;
       console.log("player1 done");
-    }else if(id==2 && !player2.actionReady){
+    }else if(playerId==2 && !player2.actionReady){
       player2.getAction(action, item);
       player2.actionReady = true;
       console.log("player2 done");
@@ -157,7 +157,7 @@ io.on('connection', (socket) => {
       player1.takeDamage(p2top1);
       player2.takeDamage(p1top2);
       //血量判定
-      io.emit("msg", p1top2, p2top1);
+      io.emit("dmg", p1top2, p2top1);
       if(player1.hp<=0 || player2.hp<=0){
         if(player1.hp<player2.hp){
           io.on("game_done", 1); //player1 lose

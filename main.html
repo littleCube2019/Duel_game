@@ -29,6 +29,7 @@
 		let socket = io();
 		var round = 1;
 		var player_act = {"action":"none", "item":"none"};
+		var playerId;
 
 		//message
 		var num_message = 0;
@@ -72,20 +73,20 @@
 			$("#enemy_crit").text(crit*100 + "%");
 		})
 
-		socket.on("msg", (mag1, mag2)=>{ // 顯示上回合造成得傷害
-			if(id==1){
-				addMessage("你對敵方造成造成" + msg2 + "點傷害");
-				addMessage("敵方對你造成" + msg1 + "點傷害");
-			}else if(id==2){
-				addMessage("你對敵方造成造成" + msg1 + "點傷害");
-				addMessage("敵方對你造成" + msg2 + "點傷害");
+		socket.on("dmg", (dmg1, dmg2)=>{ // 顯示上回合造成得傷害
+			if(playerId==1){
+				addMessage("你對敵方造成造成" + dmg2 + "點傷害");
+				addMessage("敵方對你造成" + dmg1 + "點傷害");
+			}else if(playerId==2){
+				addMessage("你對敵方造成造成" + dmg1 + "點傷害");
+				addMessage("敵方對你造成" + dmg2 + "點傷害");
 			}
 		});
 		socket.on("next_round", (p1_hp, p2_hp)=>{  //更新雙方血量
-			if(id==1){
+			if(playerId==1){
 				$("#my_hp").text(p1_hp);
 				$("#enemy_hp").text(p2_hp);
-			}else if(id==2){
+			}else if(playerId==2){
 				$("#my_hp").text(p2_hp);
 				$("#enemy_hp").text(p1_hp);
 			}
@@ -98,12 +99,12 @@
 		/*
 		//更新每回合雙方血量
 		socket.on("update", (p1_hp, p2_hp, msg1, msg2)=>{
-			if(id==1){
+			if(playerId==1){
 				$("#my_hp").text(p1_hp);
 				$("#enemy_hp").text(p2_hp);
 				addMessage("你對敵方" + msg2);
 				addMessage("敵方對你" + msg1);
-			}else if(id==2){
+			}else if(playerId==2){
 				$("#my_hp").text(p2_hp);
 				$("#enemy_hp").text(p1_hp);
 				addMessage("你對敵方" + msg1);
@@ -122,14 +123,14 @@
 		$(document).ready(()=>{
 			//選擇玩家
 			$("#pl1").click(()=>{
-				id = 1;
+				playerId = 1;
 				$("#pl1").hide();
 				$("#pl2").hide();
 				$("#pl").text("你是玩家1");
 				socket.emit("choose_character", 1);
 			});
 			$("#pl2").click(()=>{
-				id = 2;
+				playerId = 2;
 				$("#pl1").hide();
 				$("#pl2").hide();
 				$("#pl").text("你是玩家2");
@@ -139,25 +140,29 @@
 			//選擇行動
 			$("#action_atk").click(()=>{
 				player_act.action = "atk";
-				socket.emit("choose_action", "atk", id);
+				addMessage("你選擇了攻擊");
+				socket.emit("choose_action", "atk", playerId);
 			});
 			$("#action_def").click(()=>{
 				player_act.action = "def";
-				socket.emit("choose_action", "def", id);
+				addMessage("你選擇了防禦");
+				socket.emit("choose_action", "def", playerId);
 			});
 
 			//選擇道具
 			$("#item_use").click(()=>{
 				player_act.item = "use";
-				socket.emit("choose_item", "use", id);
+				addMessage("你選擇使用道具");
+				socket.emit("choose_item", "use", playerId);
 			});
 			$("#item_discard").click(()=>{
 				player_act.item = "del";
-				socket.emit("choose_item", "delete", id);
+				addMessage("你選擇丟棄道具");
+				socket.emit("choose_item", "delete", playerId);
 			})
 
 			$("#action_done").click(()=>{
-				socket.emit("action_done", id, player_act.action, player_act.item);
+				socket.emit("action_done", playerId, player_act.action, player_act.item);
 				player_act.action = "none";
 				player_act.item = "none";
 			})
