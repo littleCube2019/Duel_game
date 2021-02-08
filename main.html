@@ -28,7 +28,9 @@
 	<script>
 		let socket = io();
 		var round = 1;
-		
+		var player_act = {"action":"none", "item":"none"};
+		var playerId;
+
 		//message
 		var num_message = 0;
 		var MAX_MESSAGE = 22;
@@ -71,14 +73,38 @@
 			$("#enemy_crit").text(crit*100 + "%");
 		})
 
+		socket.on("dmg", (dmg1, dmg2)=>{ // 顯示上回合造成得傷害
+			if(playerId==1){
+				addMessage("你對敵方造成造成" + dmg2 + "點傷害");
+				addMessage("敵方對你造成" + dmg1 + "點傷害");
+			}else if(playerId==2){
+				addMessage("你對敵方造成造成" + dmg1 + "點傷害");
+				addMessage("敵方對你造成" + dmg2 + "點傷害");
+			}
+		});
+		socket.on("next_round", (p1_hp, p2_hp)=>{  //更新雙方血量
+			if(playerId==1){
+				$("#my_hp").text(p1_hp);
+				$("#enemy_hp").text(p2_hp);
+			}else if(playerId==2){
+				$("#my_hp").text(p2_hp);
+				$("#enemy_hp").text(p1_hp);
+			}
+			round += 1;
+			$("#round").text(round);
+			player_act.action = "none";
+			player_act.item = "none";
+		})
+
+		/*
 		//更新每回合雙方血量
 		socket.on("update", (p1_hp, p2_hp, msg1, msg2)=>{
-			if(id==1){
+			if(playerId==1){
 				$("#my_hp").text(p1_hp);
 				$("#enemy_hp").text(p2_hp);
 				addMessage("你對敵方" + msg2);
 				addMessage("敵方對你" + msg1);
-			}else if(id==2){
+			}else if(playerId==2){
 				$("#my_hp").text(p2_hp);
 				$("#enemy_hp").text(p1_hp);
 				addMessage("你對敵方" + msg1);
@@ -92,19 +118,19 @@
 		socket.on("act_ready", (type)=>{
 			addMessage("你選擇了" + type);
 		})
-
+		*/
 
 		$(document).ready(()=>{
 			//選擇玩家
 			$("#pl1").click(()=>{
-				id = 1;
+				playerId = 1;
 				$("#pl1").hide();
 				$("#pl2").hide();
 				$("#pl").text("你是玩家1");
 				socket.emit("choose_character", 1);
 			});
 			$("#pl2").click(()=>{
-				id = 2;
+				playerId = 2;
 				$("#pl1").hide();
 				$("#pl2").hide();
 				$("#pl").text("你是玩家2");
@@ -113,18 +139,32 @@
 
 			//選擇行動
 			$("#action_atk").click(()=>{
-				socket.emit("choose_action", "atk", id);
+				player_act.action = "atk";
+				addMessage("你選擇了攻擊");
+				socket.emit("choose_action", "atk", playerId);
 			});
 			$("#action_def").click(()=>{
-				socket.emit("choose_action", "def", id);
+				player_act.action = "def";
+				addMessage("你選擇了防禦");
+				socket.emit("choose_action", "def", playerId);
 			});
 
 			//選擇道具
 			$("#item_use").click(()=>{
-				socket.emit("choose_item", "use", id);
+				player_act.item = "use";
+				addMessage("你選擇使用道具");
+				socket.emit("choose_item", "use", playerId);
 			});
 			$("#item_discard").click(()=>{
-				socket.emit("choose_item", "delete", id);
+				player_act.item = "del";
+				addMessage("你選擇丟棄道具");
+				socket.emit("choose_item", "delete", playerId);
+			})
+
+			$("#action_done").click(()=>{
+				socket.emit("action_done", playerId, player_act.action, player_act.item);
+				player_act.action = "none";
+				player_act.item = "none";
 			})
 		});
 	</script>
@@ -194,7 +234,7 @@
             <div>ATK: <span id="enemy_atk"></span> </div>
 			<div>DEF: <span id="enemy_def"></span> </div>
 			<div>Critical: <span id="enemy_crit"></span> </div>
-			<div>Critical Damage: <span id="enemy_crit_dmg">2</span> </div>
+			<div>Critical Damage: <span id="enemy_crit_dmg">X2</span> </div>
         
         </div>
 
@@ -287,7 +327,13 @@
 					隨機抽取一張卡片
 				</div>
 
-    		</div> <!-- id= mission_action 的closing tag-->
+			</div> <!-- id= mission_action 的closing tag-->
+			
+			<div id="round_done" class="interact-sector">結束這回合
+				<div>
+					<button id="action_done" class="interact-button">確認</button>
+				</div>
+			</div>
 
     		
 
