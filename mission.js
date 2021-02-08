@@ -109,7 +109,7 @@ var mission = [
 				}
 			}
 			else{
-				if(player.action.basic=="def" ){ //action == defend
+				if(player.action.basic=="def" && player.prevAction =="def"){ //action == defend
 					player.remaining-=1;
 				}
 				else{
@@ -124,7 +124,7 @@ var mission = [
 		player.mission=-1; //mission remove
 	},
 	mission_success:(player,enemy)=>{
-		player.def+=1;
+		player.def+=2;
 		player.mission=-1; //mission remove 
 	},
 },
