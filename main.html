@@ -83,12 +83,14 @@
 			$("#enemy_crit").text(crit*100 + "%");
 		})
 
-		socket.on("dmg", (dmg1, dmg2)=>{ // 顯示上回合造成得傷害
+		socket.on("dmg", (dmg1, dmg2, p1Action, p2Action)=>{ // 顯示上回合造成得傷害
 			if(playerId==1){
 				addMessage("你對敵方造成造成" + dmg1 + "點傷害");
+				addMessage("敵方上回合的行動:" + p2Action);
 				addMessage("敵方對你造成" + dmg2 + "點傷害");
 			}else if(playerId==2){
 				addMessage("你對敵方造成造成" + dmg2 + "點傷害");
+				addMessage("敵方上回合的行動:" + p1Action);
 				addMessage("敵方對你造成" + dmg1 + "點傷害");
 			}
 		});
