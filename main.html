@@ -85,11 +85,11 @@
 
 		socket.on("dmg", (dmg1, dmg2)=>{ // 顯示上回合造成得傷害
 			if(playerId==1){
-				addMessage("你對敵方造成造成" + dmg2 + "點傷害");
-				addMessage("敵方對你造成" + dmg1 + "點傷害");
-			}else if(playerId==2){
 				addMessage("你對敵方造成造成" + dmg1 + "點傷害");
 				addMessage("敵方對你造成" + dmg2 + "點傷害");
+			}else if(playerId==2){
+				addMessage("你對敵方造成造成" + dmg2 + "點傷害");
+				addMessage("敵方對你造成" + dmg1 + "點傷害");
 			}
 		});
 		socket.on("next_round", (p1_hp, p2_hp)=>{  //更新雙方血量
@@ -104,6 +104,15 @@
 			$("#round").text(round);
 			player_act.action = "none";
 			player_act.item = "none";
+		})
+		socket.on("game_over", (loser)=>{
+			if(loser==0){
+				addMessage("平手");
+			}else if(loser==playerId){
+				addMessage("haiya你輸了");
+			}else{
+				addMessage("fuiyo你贏了");
+			}
 		})
 
 		/*
@@ -173,6 +182,7 @@
 
 			$("#action_done").click(()=>{
 				socket.emit("action_done", playerId, player_act.action, player_act.item);
+				addMessage("你結束了這回合，等待對方行動");
 				player_act.action = "none";
 				player_act.item = "none";
 			})

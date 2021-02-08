@@ -19,7 +19,7 @@ class player {
 	constructor(playerId){
 			// 以一個基本初始玩家為預設值
   this.id = playerId;  //區分玩家
-  this.hp = 10; //血量 
+  this.hp = 2; //血量 
   this.atk = 1; //攻擊力
   this.def = 1; //防禦力
   this.crit_rate = 0.5 //爆擊率
@@ -29,8 +29,8 @@ class player {
   this.mission = 0 ; //同上
   this.action = {"basic":"none", "item":"none"}; //使用者該回合採取的行動 (可能可以分為 0: 攻擊, 1:防守, 2:祈禱 ....)
   this.prevAction= "none"; //上一回合的行動
-  this.DamageDef={"normal": 0, "sprite":0 , "item":0 } //會計算對方防禦的傷害
-  this.DamageNoDef={"spike":0} // 不會計算對方防禦的傷害
+  this.damageDef={"normal": 0, "sprite":0 , "item":0 } //會計算對方防禦的傷害
+  this.damageNoDef={"spike":0} // 不會計算對方防禦的傷害
   this.takenDamage={"normal": 0 , "spike":0, "sprite":0 , "item":0} // 承受傷害
   this.remaining=1
   this.isCritical = false // 是否爆擊
@@ -46,17 +46,17 @@ class player {
     if(this.action.basic=="atk"){
       this.critical();
       if(this.isCritical){
-        this.DamageDef.normal = this.atk * 2;
+        this.damageDef.normal = this.atk * 2;
       }else{
-        this.DamageDef.normal = this.atk;
+        this.damageDef.normal = this.atk;
       }
     }else{
-      this.DamageDef.normal = 0;
+      this.damageDef.normal = 0;
     }
     if(this.action.item=="use"){
-      this.DamageDef.item = this.item; //待補
+      this.damageDef.item = this.item; //待補
     }else{
-      this.DamageDef.item = 0;
+      this.damageDef.item = 0;
     }
   }
 
@@ -66,21 +66,21 @@ class player {
 
     //需考慮對方防禦
     if(enemy.action=="def"){
-      for(const k in this.DamageDef){
-        sumDef += Math.max(this.DamageDef[k]-enemy.def*1.5, 0);
+      for(const k in this.damageDef){
+        sumDef += Math.max(this.damageDef[k]-enemy.def*1.5, 0);
       }
     }else{
-      for(const k in this.DamageDef){
-        sumDef += Math.max(this.DamageDef[k]-enemy.def, 0);
+      for(const k in this.damageDef){
+        sumDef += Math.max(this.damageDef[k]-enemy.def, 0);
       }
     }
 
     //不需考慮對方防禦
-    for(const k in this.DamageNoDef){
-      sumNoDef += this.DamageNoDef[k];
+    for(const k in this.damageNoDef){
+      sumNoDef += this.damageNoDef[k];
     }
     if(enemy.action!="atk"){
-      sumNoDef -= this.DamageNoDef.spike;
+      sumNoDef -= this.damageNoDef.spike;
     }
     return sumDef + sumNoDef;
   }
@@ -160,16 +160,15 @@ io.on('connection', (socket) => {
       io.emit("dmg", p1top2, p2top1);
       if(player1.hp<=0 || player2.hp<=0){
         if(player1.hp<player2.hp){
-          io.on("game_done", 1); //player1 lose
+          io.emit("game_over", 1); //player1 lose
         }else if(player1.hp>player2.hp){
-          io.on("game_done", 2); // player2 lose
+          io.emit("game_over", 2); // player2 lose
         }else{
-          io.emit("game_done", 0); // tieed
+          io.emit("game_over", 0); // tieed
         }
-      }else{
-        io.emit("next_round", player1.hp, player2.hp);
-        player1.actionReady = player2.actionReady = false;
       }
+      io.emit("next_round", player1.hp, player2.hp);
+      player1.actionReady = player2.actionReady = false;
     }
   })
 
