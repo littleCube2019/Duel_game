@@ -21,7 +21,13 @@ Open your web browser and enter the url "localhost:3000"
 (Note: you should play this game with full screen)
 
 # Online version
-``
+`https://duel-the-game.herokuapp.com/`
+
+update to horuku
+```
+heroku git:remote -a duel-the-game
+git push heroku master
+```
 
 # Install
 

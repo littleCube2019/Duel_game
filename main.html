@@ -1,7 +1,7 @@
 <html>
 	<head>
 		<title>
-			Just a game
+			Duel_the_Game
 
 		</title>
 		<!-- local file below -->
@@ -10,7 +10,14 @@
 		<link rel='stylesheet' href='Style.css'>
 
 		<!-- our js file here-->
-		<script language="JavaScript" src="gameJS.js"></script>
+		<script language="JavaScript" src="card.js"></script>
+		<!-- a "card" object array name card-->
+		<script language="JavaScript" src="mission.js"></script>
+		<!-- a "mission" object array name mission-->
+		<script language="JavaScript" src="sprite.js"></script>
+		<!-- a "sprite" object array name sprite-->
+		<script language="JavaScript" src="item.js"></script>
+		<!-- a "item" object array name item-->
 		<!-- ==================================== -->
 
 		<!-- module below-->
@@ -30,8 +37,8 @@
 		var round = 1;
 		
 		//message
-		var num_message = 0;
-		var MAX_MESSAGE = 22;
+		var num_message = 0; 
+		var MAX_MESSAGE = 22; 
 		function addMessage(Text){
 			if(num_message>= MAX_MESSAGE){
 				$("#message div:nth-child(1)").remove();
@@ -47,16 +54,19 @@
 		}
 
 		//選擇角色
-		socket.on("welcome",()=>{
+		socket.on("welcome",()=>{ //when start,hide the main page to let player select charcters.
 			$("#LEFT").hide();
 			$("#RIGHT").hide();
 		})
-		socket.on("pl1_choosed", ()=>{
+
+		socket.on("pl1_choosed", ()=>{ 
 			$("#pl1").hide();
 		})
 		socket.on("pl2_choosed", ()=>{
 			$("#pl2").hide();
 		})
+		
+		// player finish selecting , game start and display main page
 		socket.on("start_game", (hp, atk, def, crit)=>{
 			$("#choose_pl").hide();
 			$("#LEFT").show();
