@@ -23,7 +23,7 @@ class player {
 	constructor(playerId){
 			// 以一個基本初始玩家為預設值
   this.id = playerId;  //區分玩家
-  this.hp = 2; //血量 
+  this.hp = 10; //血量 
   this.atk = 1; //攻擊力
   this.def = 1; //防禦力
   this.crit_rate = 0.5 //爆擊率
@@ -161,7 +161,7 @@ io.on('connection', (socket) => {
       player1.takeDamage(p2top1);
       player2.takeDamage(p1top2);
       //血量判定
-      io.emit("dmg", p1top2, p2top1);
+      io.emit("dmg", p1top2, p2top1, player1.action.basic, player2.action.basic);
       if(player1.hp<=0 || player2.hp<=0){
         if(player1.hp<player2.hp){
           io.emit("game_over", 1); //player1 lose
