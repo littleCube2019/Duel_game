@@ -1,3 +1,5 @@
+
+
 #LEFT {
 	width: 50%; 
 	float: left;
@@ -26,6 +28,10 @@
 
 }
 
+
+
+
+
 .interact-sector{
 	height:100px;
 
@@ -45,6 +51,10 @@
 
 div {
 	font-family:"DFKai-SB";
+}
+
+.message_div{
+	font-size:1px;
 }
 
 #my_status {
@@ -69,6 +79,7 @@ div {
 	width: 50%; 
 	float: left;
 	height:100%;
+
 }
 
 #interact_sector {
@@ -98,3 +109,4 @@ div {
 	height:25px;
 	width: 70px;
 }
+

@@ -47,6 +47,11 @@ div {
 	font-family:"DFKai-SB";
 }
 
+.message_div{
+
+	font-size : 50px;
+}
+
 #my_status {
 	background-color: #F0F8FF;
 	width: 50%; 
