@@ -61,6 +61,7 @@ var card = [
 	防禦力+3" 
 },
 ]
+module.exports = card;
 /* testing version
 {
 	id:1005,
@@ -165,3 +166,4 @@ var card = [
 	暈眩: 無法行動"
 },
 ]
+*/

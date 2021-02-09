@@ -24,11 +24,11 @@ var mission = [
 	},
 	mission_check:(player,enemy)=>{
 
-
-		if(player.action=="def"){ //action == defend
+		console.log(player.action.basic);
+		if(player.action.basic=="def"){ //action == defend
 			player.remaining-=1;
 			if(player.remaining==0){
-					this.mission_success(player,enemy);
+				mission[0].mission_success(player,enemy);
 			}
 		}
 				
@@ -53,7 +53,7 @@ var mission = [
 		
 		player.remaining-=player.damageNoDef["spike"] ;
 		if(player.remaining<0){
-			this.mission_success(player,enemy);
+			mission[1].mission_success(player,enemy);
 		}
 
 	},
@@ -75,10 +75,10 @@ var mission = [
 	mission_check:(player,enemy)=>{
 		
 		
-		if(player.action=="def"){ //action == defend
+		if(player.action.basic=="def"){ //action == defend
 			player.remaining-=1;
 			if(player.remaining==0){
-				this.mission_success(player,enemy);
+				mission[2].mission_success(player,enemy);
 			}
 		}
 			
@@ -102,23 +102,23 @@ var mission = [
 	},
 	mission_check:(player,enemy)=>{
 	
-			if(remaining==3){
+			if(player.remaining==3){
 				if(player.action.basic=="def" ){ //action == defend
 					player.remaining-=1;
 				}
 				else{
-					this.mission_fail(player,enemy);
+					mission[3].mission_fail(player,enemy);
 				}
 			}
 			else{
 				if(player.action.basic=="def" && player.prevAction =="def"){ //action == defend
 					player.remaining-=1;
 					if(player.remaining==0){
-						this.mission_success(player,enemy);
+						mission[3].mission_success(player,enemy);
 					}
 				}
 				else{
-					this.mission_fail(player,enemy);
+					mission[3].mission_fail(player,enemy);
 				}
 			}
 		
@@ -140,15 +140,14 @@ var mission = [
 		player.remaining = 3;
 	},
 	mission_check:(player,enemy)=>{
-	
-			if sumOfObj(player.takenDamage>0){
-				this.mission_fail(player,enemy);
+		  if (sumOfObj(player.takenDamage)>0){
+			mission[4].mission_fail(player,enemy);
 			}
 
 			else{
 				player.remaining-=1;
 				if(player.remaining ==0){
-					this.mission_success(player,enemy);
+					mission[4].mission_success(player,enemy);
 				}
 			}
 		
@@ -159,8 +158,9 @@ var mission = [
 		player.mission=-1; //mission remove
 	},
 	mission_success:(player,enemy)=>{
-		player.def+=2;
+		player.def+=3;
 		player.mission=-1; //mission remove 
 	},
 },
 ]
+module.exports = mission;
