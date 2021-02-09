@@ -40,17 +40,17 @@
 
 		//message
 		var num_message = 0; 
-		var MAX_MESSAGE = 22; 
+		var MAX_MESSAGE = 15; 
 		function addMessage(Text){
 			if(num_message>= MAX_MESSAGE){
 				$("#message div:nth-child(1)").remove();
 			}
 
 			if(num_message %2 ==0){
-				$("#message").append("<div style=\"background-color:#F0F8FF\">"+Text+"</div>");
+				$("#message").append("<div class=\"message_div\" style=\"background-color:#F0F8FF;\">"+Text+"</div>");
 			} 
 			else{
-				$("#message").append("<div style=\"background-color:#DCDCDC\">"+Text+"</div>");
+				$("#message").append("<div class=\"message_div\" style=\"background-color:#DCDCDC\">"+Text+"</div>");
 			}
 			num_message+=1;
 		}
@@ -109,9 +109,9 @@
 			if(loser==0){
 				addMessage("平手");
 			}else if(loser==playerId){
-				addMessage("haiya你輸了");
+				addMessage("你輸了");
 			}else{
-				addMessage("fuiyo你贏了");
+				addMessage("你贏了");
 			}
 		})
 
@@ -160,11 +160,13 @@
 			$("#action_atk").click(()=>{
 				player_act.action = "atk";
 				addMessage("你選擇了攻擊");
+				$("#show_action").text("攻擊");
 				socket.emit("choose_action", "atk", playerId);
 			});
 			$("#action_def").click(()=>{
 				player_act.action = "def";
 				addMessage("你選擇了防禦");
+				$("#show_action").text("防禦");
 				socket.emit("choose_action", "def", playerId);
 			});
 
@@ -310,7 +312,7 @@
 
     	<div id="interact_sector" >操作角色
     		<div id="turn_action" class="interact-sector">
-    		本回合行動，選擇完後此回合結束
+    		本回合行動
 
     			<div>
     			<button id="action_atk" class="interact-button"> 攻擊 </button>
@@ -320,7 +322,12 @@
     			<div>
 				<button id="action_def" class="interact-button">防禦</button>
 				此回合提升50%防禦力
+				</div>                       
+
+				<div>
+				當前採取行動為: <span id="show_action" style="color:red"> </span>
 				</div>
+
     			
 			</div> <!-- turn_action 的closing tag-->
 
@@ -371,7 +378,7 @@
 		<!-- ==================================== -->
 		
     	<div id="message">message
-	<div style="background-color:#F0F8FF">Testing</div>
+	
 
     	</div>
         
