@@ -1,11 +1,4 @@
-//function canAcceptMission(player,mission){
-// input :player object , mission object
-// output: boolean , determine player can accept this mission or not
-	//let checker = (arr, target) => target.every(v => arr.includes(v));
-// check all target ele in arr ? 
-	//return checker(player.doneMission,mission.preneed_id);
 
-//}
 function sumOfObj(obj) {
   				return Object.keys(obj).reduce((sum,key)=>sum+parseFloat(obj[key]||0),0);
 			} //sum of object
@@ -125,7 +118,7 @@ var mission = [
 				}
 			}
 			else{
-				if(player.action.basic=="def" && player.prevAction =="def"){ //action == defend
+				if(player.action.basic=="def" && player.prevAction == "def"){ //action == defend
 					player.remaining-=1;
 					if(player.remaining==0){
 						return mission[3].mission_success(player,enemy);
@@ -421,3 +414,4 @@ var mission = [
 },
 ]
 
+module.exports = mission;

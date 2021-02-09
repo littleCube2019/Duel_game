@@ -5,7 +5,9 @@ var io = require('socket.io')(http);
 const e = require('express');
 var express = require('express');
 
-
+var card = require("./card.js");
+var mission = require("./mission.js");
+var item = require("./item.js");
 
 app.get('/', function(req, res){
   res.sendFile(__dirname + '/main.html');
