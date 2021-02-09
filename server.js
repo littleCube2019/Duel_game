@@ -7,7 +7,9 @@ var express = require('express');
 var card = require("./card.js");
 var mission = require("./mission.js");
 
-
+var card = require("./card.js");
+var mission = require("./mission.js");
+var item = require("./item.js");
 
 app.get('/', function(req, res){
   res.sendFile(__dirname + '/main.html');
@@ -25,7 +27,6 @@ class player {
 			// 以一個基本初始玩家為預設值
   this.id = playerId;  //區分玩家
   this.hp = 10; //血量 
-  this.maxHp = 10; // 最大血量
   this.atk = 1; //攻擊力
   this.def = 1; //防禦力
   this.crit_rate = 0.5 //爆擊率

@@ -134,7 +134,7 @@ var card = [
 	id:2001,
 	type:"道具卡",
 	name:"土製炸彈",
-	description:"使用後造成 敵方群體傷害 5點，使用後消失"
+	description:"使用後造成 敵方群體傷害3點，使用後消失"
 },
 {
 	id:2002,
@@ -152,14 +152,7 @@ var card = [
 	id:2004,
 	type:"道具卡",
 	name:"飛刀",
-	description:"效果: 使用後造成3點傷害，使用後消失"
-},
-{
-	id:2005,
-	type:"道具卡",
-	name:"大槌",
-	description:"效果: 當此道具存在，採取攻擊有10%機率造成對方下回合暈眩\
-	暈眩: 無法行動"
+	description:"效果: 使用後造成單體5點傷害，使用後消失"
 },
 ]
 module.exports = card;
