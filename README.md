@@ -29,6 +29,11 @@ heroku git:remote -a duel-the-game
 git push heroku master
 ```
 
+online log:  
+https://dashboard.heroku.com/apps/duel-the-game/logs
+
+
+
 # Install
 
 

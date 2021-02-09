@@ -4,10 +4,10 @@ var http = require('http').Server(app);
 var io = require('socket.io')(http);
 const e = require('express');
 var express = require('express');
-
 var card = require("./card.js");
 var mission = require("./mission.js");
-var item = require("./item.js");
+
+
 
 app.get('/', function(req, res){
   res.sendFile(__dirname + '/main.html');
@@ -19,11 +19,13 @@ http.listen(process.env.PORT || 3000, function(){
 
 app.use(express.static('public'));
 
+
 class player {
 	constructor(playerId){
 			// 以一個基本初始玩家為預設值
   this.id = playerId;  //區分玩家
   this.hp = 10; //血量 
+  this.maxHp = 10; // 最大血量
   this.atk = 1; //攻擊力
   this.def = 1; //防禦力
   this.crit_rate = 0.5 //爆擊率
@@ -31,7 +33,7 @@ class player {
   this.item = 0 ;  // 應該會放item卡的id
   this.sprite =  0; //同上 精靈卡的id
   this.mission = 0 ; //同上
-  this.action = {"basic":"none", "item":"none"}; //使用者該回合採取的行動 (可能可以分為 0: 攻擊, 1:防守, 2:祈禱 ....)
+  this.action = {"basic":"none", "item":"none", "card":"none"}; //使用者該回合採取的行動 (可能可以分為 0: 攻擊, 1:防守, 2:祈禱 ....)
   this.prevAction= "none"; //上一回合的行動
   this.damageDef={"normal": 0, "sprite":0 , "item":0 } //會計算對方防禦的傷害
   this.damageNoDef={"spike":0} // 不會計算對方防禦的傷害
@@ -40,10 +42,11 @@ class player {
   this.isCritical = false // 是否爆擊
   this.actionReady = false; //是否完成一回合的行動
   }
-  getAction(action, item){
+  getAction(action, item, card){
     this.prevAction = this.action.basic;
     this.action.basic = action;
     this.action.item = item;
+    this.action.card = card;
   }
   // 造成傷害(未計算防禦)
   totalDamage(){
@@ -71,11 +74,13 @@ class player {
     //需考慮對方防禦
     if(enemy.action=="def"){
       for(const k in this.damageDef){
-        sumDef += Math.max(this.damageDef[k]-enemy.def*1.5, 0);
+        enemy.takenDamage[k] = Math.max(this.damageDef[k]-enemy.def*1.5, 0);
+        sumDef += enemy.takenDamage[k];
       }
     }else{
       for(const k in this.damageDef){
-        sumDef += Math.max(this.damageDef[k]-enemy.def, 0);
+        enemy.takenDamage[k] = Math.max(this.damageDef[k]-enemy.def, 0);
+        sumDef += enemy.takenDamage[k];
       }
     }
 
@@ -85,6 +90,8 @@ class player {
     }
     if(enemy.action!="atk"){
       sumNoDef -= this.damageNoDef.spike;
+    }else{
+      enemy.takenDamage.spike = this.damageNoDef.spike;
     }
     return sumDef + sumNoDef;
   }
@@ -116,6 +123,14 @@ var player2 = {"hp":10, "atk":1, "def":1, "crit_rate":0.5, "action":"none",
                 var ready1 = false, ready2 = false;
 */
 
+function pickCard(){ //testing
+  return Math.floor(Math.random()*5);
+};
+
+function getmission(me, enemy){
+  mission[me.mission].mission_start(me, enemy);
+};
+
 io.on('connection', (socket) => {
   socket.emit("welcome");
   console.log('Client connected');
@@ -134,6 +149,8 @@ io.on('connection', (socket) => {
       socket.emit("id_pl2");
       io.emit("pl2_choosed");
     }
+    var caard = card[pickCard()];
+    socket.emit("det_card", caard);
     if(player1.actionReady && player2.actionReady){
       io.emit("start_game", 10, 1, 1, 0.5);
       player1.actionReady = player2.actionReady = false;
@@ -141,14 +158,44 @@ io.on('connection', (socket) => {
     }
   });
 
+  socket.on("pick_card", (id)=>{
+    if(id==1){
+      player1.mission = 2; //測試
+      getmission(player1, player2);
+      console.log("player1 pick card" + player1.mission);
+      socket.emit("get_card", card[player1.mission]);
+    }else if(id==2){
+      player2.mission = 3; // 測試
+      getmission(player2, player1);
+      console.log("player2 pick card" + player2.mission);
+      socket.emit("get_card", card[player2.mission]);
+    }
+  })
 
-  socket.on("action_done", (playerId, action, item)=>{
+  socket.on("action_done", (playerId, action, item, caard)=>{
     if(playerId==1 && !player1.actionReady){
-      player1.getAction(action, item);
+      player1.getAction(action, item, caard);
+      /*
+      if(player1.action.card=="pick"){
+        player1.mission = 2; //測試
+        getmission(player1, player2);
+        console.log("player1 pick card" + player1.mission);
+        socket.emit("get_card", card[player1.mission]);
+      }
+      */
       player1.actionReady = true;
       console.log("player1 done");
     }else if(playerId==2 && !player2.actionReady){
-      player2.getAction(action, item);
+      player2.getAction(action, item, caard);
+      /*
+      if(player2.action.card=="pick"){
+        player2.mission = 2; // 測試
+        getmission(player2, player1);
+        console.log("player2 pick card" + player2.mission);
+        console.log("p2 mission:" + player2.remaining);
+        socket.emit("get_card", card[player2.mission]);
+      }
+      */
       player2.actionReady = true;
       console.log("player2 done");
     }
@@ -171,100 +218,46 @@ io.on('connection', (socket) => {
           io.emit("game_over", 0); // tieed
         }
       }
-      io.emit("next_round", player1.hp, player2.hp);
+      var p1_mission_state = "none", p2_mission_state = "none";
+      if(player1.mission>=0){
+        p1_mission_state = mission[player1.mission].mission_check(player1, player2);
+        if(p1_mission_state=="ongoing"){
+          io.emit("mission_ongoing", 1, player1.remaining);
+          console.log("pl mission ongoning");
+        }else if(p1_mission_state=="success"){
+          io.emit("mission_success", 1)
+          console.log("pl mission success");
+        }else if(p1_mission_state=="fail"){
+          io.emit("mission_failed", 1);
+          console.log("pl mission failed");
+        }
+      }else{
+        io.emit("noMission", 1);
+      }
+      if(player2.mission>=0){
+        p2_mission_state = mission[player2.mission].mission_check(player2, player1);
+        if(p2_mission_state=="ongoing"){
+          io.emit("mission_ongoing", 2, player2.remaining);
+          console.log("p2 mission ongoning");
+        }else if(p2_mission_state=="success"){
+          io.emit("mission_success", 2)
+          console.log("p2 mission success");
+        }else if(p2_mission_state=="fail"){
+          io.emit("mission_failed", 2);
+          console.log("p2 mission failed");
+        }
+      }else{
+        io.emit("noMission", 2);
+      }
+      
+
+      console.log("p1: " + player1.remaining + " p2: " + player2.remaining);
+
+      io.emit("next_round", 1, player1.hp, player1.atk, player1.def, player1.crit_rate);
+      io.emit("next_round", 2, player2.hp, player2.atk, player2.def, player2.crit_rate);
       player1.actionReady = player2.actionReady = false;
     }
   })
-
-  /*
-  //選擇行動 & 計算傷害 (舊版)
-  socket.on("choose_action", (type, id)=>{
-    if(id==1 && !act_ready1){
-      socket.emit("act_ready", type);
-      player1.action = type;
-      act_ready1 = true;
-      console.log("player1 ready");
-    }else if(id==2 && !act_ready2){
-      socket.emit("act_ready", type);
-      player2.action = type;
-      act_ready2 = true;
-      console.log("player2 ready");
-    }
-    if(act_ready1 && act_ready2){
-      var p1_atk, p1_def, p2_atk, p2_def;
-      var crit;
-      var msg1, msg2;
-      if(player1.action=="atk"){
-        crit = Math.round(Math.random()*100);
-        if(crit<player1.crit_rate*100){
-          console.log("p1 爆擊");
-          p1_atk = Math.round(player1.atk * 2);
-        }else{
-          p1_atk = Math.round(player1.atk);
-        }
-        p1_def = player1.def;
-      }else if(player1.action=="def"){
-        p1_atk = 0;
-        p1_def = Math.round(player1.def * 1.5);
-      }
-      if(player2.action=="atk"){
-        crit = Math.round(Math.random()*100);
-        if(crit<player2.crit_rate*100){
-          console.log("p2 爆擊");
-          p2_atk = Math.round(player2.atk * 2);
-        }else{
-          p2_atk = Math.round(player2.atk);
-        }
-        p2_def = player2.def;
-      }else if(player2.action=="def"){
-        p2_atk = 0;
-        p2_def = Math.round(player2.def * 1.5);
-      }
-      if(p2_atk - p1_def > 0){
-        player1.hp -= p2_atk - p1_def;
-        msg1 = "造成了" + (p2_atk - p1_def) +"點傷害";
-      }else{
-        msg1 = "造成了" + 0 +"點傷害";
-      }
-      if(p1_atk - p2_def > 0){
-        player2.hp -= p1_atk - p2_def;
-        msg2 = "造成了" + (p1_atk - p2_def) +"點傷害";
-      }else{
-        msg2 = "造成了" + 0 +"點傷害";
-      }
-      act_ready1 = act_ready2 = false;
-      console.log("one round finished");
-      io.emit("update", player1.hp, player2.hp, msg1, msg2);
-    }
-  })
-
-  //使用道具
-  socket.on("choose_item", (type, id)=>{
-    if(id==1 && !item_ready1){
-      item_ready1 = true;
-      if(type=="use"){
-        if(player1.item.type=="atk"){
-
-        }
-      }else if(type=="delete"){
-        player1.item.type = "none";
-        player2.item.value = 0;
-        socket.emit("delete_item");
-      }
-    }else if(id==2 && !item_ready2){
-      item_ready2 = true;
-      if(type=="use"){
-        if(player2.item.type=="atk"){
-
-        }
-      }else if(type=="delete"){
-        player2.item.type = "none";
-        player2.item.value = 0;
-        socket.emit("delete_item");
-      }
-    }
-  })
-  */
 });
 
 

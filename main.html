@@ -9,7 +9,16 @@
 		<!--our css file -->
 		<link rel='stylesheet' href='Style.css'>
 
-		
+		<!-- our js file here-->
+		<script language="JavaScript" src="card.js"></script>
+		<!-- a "card" object array name card-->
+		<script language="JavaScript" src="mission.js"></script>
+		<!-- a "mission" object array name mission-->
+		<script language="JavaScript" src="sprite.js"></script>
+		<!-- a "sprite" object array name sprite-->
+		<script language="JavaScript" src="item.js"></script>
+		<!-- a "item" object array name item-->
+		<!-- ==================================== -->
 
 		<!-- module below-->
 		<!-- ==================================== -->
@@ -26,7 +35,7 @@
 	<script>
 		let socket = io();
 		var round = 1;
-		var player_act = {"action":"none", "item":"none"};
+		var player_act = {"action":"none", "item":"none", "card":"none"};
 		var playerId;
 
 		//message
@@ -74,6 +83,36 @@
 			$("#enemy_crit").text(crit*100 + "%");
 		})
 
+		socket.on("get_card", (card)=>{
+			console.log(typeof card);
+			addMessage("你抽到了卡片" + card.id);
+			$("#mission_name").text("當前任務:" + card.name);
+			$("#mission_description").text(card.description);
+		})
+
+		socket.on("mission_ongoing", (id, remain)=>{
+			if(playerId==id){
+				$("#mission_remain").text("完成任務還需要:" + remain);
+				console.log("mission ongoing");
+			}
+		})
+		socket.on("mission_success", (id)=>{
+			if(playerId==id){
+				addMessage("你完成了任務");
+				$("#mission_name").text("當前任務:無");
+				$("#mission_description").text("");
+				$("#mission_remain").text("");
+			}
+		})
+		socket.on("mission_failed", (id)=>{
+			if(playerId==id){
+				addMessage("任務失敗");
+				$("#mission_name").text("當前任務:無");
+				$("#mission_description").text("");
+				$("#mission_remain").text("");
+			}
+		})
+
 		socket.on("dmg", (dmg1, dmg2, p1Action, p2Action)=>{ // 顯示上回合造成得傷害
 			if(playerId==1){
 				addMessage("你對敵方造成造成" + dmg1 + "點傷害");
@@ -85,18 +124,23 @@
 				addMessage("敵方對你造成" + dmg1 + "點傷害");
 			}
 		});
-		socket.on("next_round", (p1_hp, p2_hp)=>{  //更新雙方血量
-			if(playerId==1){
-				$("#my_hp").text(p1_hp);
-				$("#enemy_hp").text(p2_hp);
-			}else if(playerId==2){
-				$("#my_hp").text(p2_hp);
-				$("#enemy_hp").text(p1_hp);
+		socket.on("next_round", (id, hp, atk, def, crit)=>{  //更新雙方血量
+			if(playerId==id){
+				$("#my_hp").text(hp);
+				$("#my_atk").text(atk);
+				$("#my_def").text(def);
+				$("#my_crit").text(crit*100 + "%");
+			}else if(playerId!=id){
+				$("#enemy_hp").text(hp);
+				$("#enemy_atk").text(atk);
+				$("#enemy_def").text(def);
+				$("#enemy_crit").text(crit*100 + "%");
 			}
 			round += 1;
 			$("#round").text(round);
 			player_act.action = "none";
 			player_act.item = "none";
+			player_act.card = "none";
 		})
 		socket.on("game_over", (loser)=>{
 			if(loser==0){
@@ -167,19 +211,25 @@
 			$("#item_use").click(()=>{
 				player_act.item = "use";
 				addMessage("你選擇使用道具");
-				socket.emit("choose_item", "use", playerId);
 			});
 			$("#item_discard").click(()=>{
 				player_act.item = "del";
 				addMessage("你選擇丟棄道具");
-				socket.emit("choose_item", "delete", playerId);
 			})
 
 			$("#action_done").click(()=>{
-				socket.emit("action_done", playerId, player_act.action, player_act.item);
+				socket.emit("action_done", playerId, player_act.action, player_act.item, player_act.card);
 				addMessage("你結束了這回合，等待對方行動");
-				player_act.action = "none";
-				player_act.item = "none";
+				player_act.action = player_act.item = player_act.card = "none";
+			})
+
+			$("#pick_card").click(()=>{
+				player_act.card = "pick";
+				socket.emit("pick_card", playerId);
+			})
+
+			$("#mission_discard").click(()=>{
+				player_act.card = "discard";
 			})
 		});
 	</script>
@@ -211,7 +261,7 @@
             <div>ATK: <span id="my_atk"></span> </div>
 			<div>DEF: <span id="my_def"></span> </div>
 			<div>Critical: <span id="my_crit"></span> </div>
-			<div>Critical Damage: <span id="my_crit_dng">x2</span> </div>
+			<div>Critical Damage: <span id="my_crit_dmg">x2</span> </div>
         
         </div>
 
@@ -288,9 +338,13 @@
 	<!-- ==================================== -->
 	<div id="LEFT_BOTTOM">
 		<div id="mission_sector">
-			<div id="my_mission">當前任務: 空</div>
+			<div id="my_mission">當前任務:</div>
 				
-			<div id="my_mission_content" class="status_content"></div>
+			<div id="my_mission_content" class="status_content">
+				<div id="mission_name"></div>
+				<div id="mission_description"></div>
+				<div id="mission_remain"></div>
+			</div>
 		</div> <!-- mission sector ending here-->
 	<!-- ''''''''''''''''''''''''''''''''''''''''''
 		Note: you can use this format:
