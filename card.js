@@ -162,4 +162,4 @@ var card = [
 	暈眩: 無法行動"
 },
 ]
-*/
+module.exports = card;

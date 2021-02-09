@@ -90,12 +90,26 @@
 			$("#mission_description").text(card.description);
 		})
 
-		socket.on("mission_check", (p1, p2)=>{
-			if(playerId==1)
-				$("#mission_remain").text("完成任務還需要:" + p1);
-			else if(playerId==2){
-				console.log(p2);
-				$("#mission_remain").text("完成任務還需要:" + p2);
+		socket.on("mission_ongoing", (id, remain)=>{
+			if(playerId==id){
+				$("#mission_remain").text("完成任務還需要:" + remain);
+				console.log("mission ongoing");
+			}
+		})
+		socket.on("mission_success", (id)=>{
+			if(playerId==id){
+				addMessage("你完成了任務");
+				$("#mission_name").text("當前任務:無");
+				$("#mission_description").text("");
+				$("#mission_remain").text("");
+			}
+		})
+		socket.on("mission_failed", (id)=>{
+			if(playerId==id){
+				addMessage("任務失敗");
+				$("#mission_name").text("當前任務:無");
+				$("#mission_description").text("");
+				$("#mission_remain").text("");
 			}
 		})
 
@@ -211,6 +225,7 @@
 
 			$("#pick_card").click(()=>{
 				player_act.card = "pick";
+				socket.emit("pick_card", playerId);
 			})
 
 			$("#mission_discard").click(()=>{

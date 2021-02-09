@@ -420,4 +420,4 @@ var mission = [
 	},
 },
 ]
-
+module.exports = mission;
