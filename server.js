@@ -19,6 +19,22 @@ http.listen(process.env.PORT || 3000, function(){
 
 app.use(express.static('public'));
 
+var missionIdToIndex={
+  10000:0,
+  10001:1,
+  10010:2,
+  10011:3,
+  10012:4,
+  10020:5,
+  10021:6,
+  10030:7,
+  10031:8,
+  10040:9,
+  10041:10,
+  10022:11,
+}
+
+
 
 class player {
 	constructor(playerId){
