@@ -35,7 +35,7 @@ var mission = [
 		return "fail";
 	},
 	mission_success:(player,enemy)=>{
-		player.spike+=1;
+		player.damageNoDef.spike+=1;
 		player.remining=0;
 		player.mission=-1; //mission remove 
 		return "success";
@@ -64,7 +64,7 @@ var mission = [
 		return "fail";
 	},
 	mission_success:(player,enemy)=>{
-		player.spike+=1;
+		player.damageNoDef.spike+=1;
 		player.mission=-1; //mission remove
 		player.remining=0; 
 		return "success";

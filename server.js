@@ -24,7 +24,7 @@ class player {
 	constructor(playerId){
 			// 以一個基本初始玩家為預設值
   this.id = playerId;  //區分玩家
-  this.hp = 10; //血量 
+  this.hp = 4; //血量 
   this.maxHp = 10; // 最大血量
   this.atk = 1; //攻擊力
   this.def = 1; //防禦力
@@ -40,7 +40,7 @@ class player {
   this.takenDamage={"normal": 0 , "spike":0, "sprite":0 , "item":0} // 承受傷害
   this.remaining=1
   this.isCritical = false // 是否爆擊
-  this.actionReady = false; //是否完成一回合的行動
+  this.actionReady = {"basic":false, "mission":false}; //是否完成一回合的行動
   }
   getAction(action, item, card){
     this.prevAction = this.action.basic;
@@ -48,6 +48,7 @@ class player {
     this.action.item = item;
     this.action.card = card;
   }
+
   // 造成傷害(未計算防禦)
   totalDamage(){
     if(this.action.basic=="atk"){
@@ -111,95 +112,120 @@ class player {
     }
   }
 };
-var player1 = new player(1);
-var player2 = new player(2);
-/*
-var player1 = {"hp":10, "atk":1, "def":1, "crit_rate":0.5, "action":"none", 
-                "item":{"type":"none", "value":0},
-                "mission":{"type":"none", "value":"none", "reward_type":"none", "reward_value":"none", "discription":"none"}};
-var player2 = {"hp":10, "atk":1, "def":1, "crit_rate":0.5, "action":"none", 
-                "item":{"type":"none", "value":0},
-                "mission":{"type":"none", "value":"none", "reward_type":"none", "reward_value":"none", "discription":"none"}};
-                var ready1 = false, ready2 = false;
-*/
+var player1,player2;
 
-function pickCard(){ //testing
+function newGame()
+{
+  player1 = new player(1);
+  player2 = new player(2);
+}
+
+function chooseCharacter(id)
+{
+  if(id==1){
+    console.log("player1 has been choosed");
+    player1.actionReady.basic = true;
+  }else if(id==2){
+    console.log("player2 has been choosed");
+    player2.actionReady.basic = true;
+  }
+  io.emit("player_choosed", id);
+}
+
+// 隨機(暫定)
+function getRandomCard()
+{ 
   return Math.floor(Math.random()*5);
 };
 
-function getmission(me, enemy){
-  mission[me.mission].mission_start(me, enemy);
-};
+// 任務處理
+function missionAction(action, me, enemy)
+{
+  var state;
+  if(action=="get" && !me.actionReady.mission){
+    me.mission = getRandomCard();
+    mission[me.mission].mission_start(me, enemy);
+    io.emit("mission_state", me, card[me.mission], "start");
+    me.actionReady.mission = true;
+  }else if(action=="discard"){
+    if(me.mission>=0){
+      state = mission[me.mission].mission_fail(me, enemy);
+      io.emit("mission_state", me, card[me.mission], "discard");
+    }
+  }else if(action=="check"){
+    if(me.mission>=0){
+      state = mission[me.mission].mission_check(me, enemy);
+      io.emit("mission_state", me, card[me.mission], state);
+      console.log("player" + me.id + " mission " + state);
+    }else{
+      io.emit("mission_state", me, card[me.mission], "noMission");
+      console.log("player" + me.id + " has no mission");
+    }
+  }
+}
+
+function itemAction(action, me, enemy)
+{
+  if(action=="use"){
+    item[me.item].use(me, enemy);
+  }else if(action=="discard"){
+    item[me.item].discard(me, enemy);
+  }
+  io.emit("item_state", me, item[me.item], action);
+}
+
+function isGameOver(player1, player2){
+  if(player1.hp<=0 || player2.hp<=0){
+    if(player1.hp<player2.hp){
+      io.emit("game_over", player1.id); //player1 lose
+    }else if(player1.hp>player2.hp){
+      io.emit("game_over", player2.id); // player2 lose
+    }else{
+      io.emit("game_over", 0); // tieed
+    }
+    return true;
+  }else{
+    return false;
+  }
+}
 
 io.on('connection', (socket) => {
-  socket.emit("welcome");
+  newGame();
+  io.emit("welcome");
   console.log('Client connected');
   socket.on('disconnect', () => console.log('Client disconnected'));
 
-  //choose player
-  socket.on("choose_character", (pl)=>{
-    if(pl==1){
-      console.log("pl1 has been choosed");
-      player1.actionReady = true;
-      socket.emit("id_pl1");
-      io.emit("pl1_choosed");
-    }else if(pl==2){
-      console.log("pl2 has been choosed");
-      player2.actionReady = true;
-      socket.emit("id_pl2");
-      io.emit("pl2_choosed");
-    }
-    var caard = card[pickCard()];
-    socket.emit("det_card", caard);
-    if(player1.actionReady && player2.actionReady){
-      io.emit("start_game", 10, 1, 1, 0.5);
-      player1.actionReady = player2.actionReady = false;
+  //選角
+  socket.on("choose_character", (id)=>{
+    chooseCharacter(id);
+    if(player1.actionReady.basic && player2.actionReady.basic){
+      io.emit("start_game");
+      player1.actionReady.basic = player2.actionReady.basic = false;
       console.log("start game");
     }
   });
 
-  socket.on("pick_card", (id)=>{
+  //任務
+  socket.on("mission_control", (id, type)=>{ 
     if(id==1){
-      player1.mission = 2; //測試
-      getmission(player1, player2);
-      console.log("player1 pick card" + player1.mission);
-      socket.emit("get_card", card[player1.mission]);
+      missionAction(type, player1, player2);
     }else if(id==2){
-      player2.mission = 3; // 測試
-      getmission(player2, player1);
-      console.log("player2 pick card" + player2.mission);
-      socket.emit("get_card", card[player2.mission]);
+      missionAction(type, player2, player1);
     }
   })
 
+  //結算回合
   socket.on("action_done", (playerId, action, item, caard)=>{
-    if(playerId==1 && !player1.actionReady){
+    if(playerId==1 && !player1.actionReady.basic){
       player1.getAction(action, item, caard);
-      /*
-      if(player1.action.card=="pick"){
-        player1.mission = 2; //測試
-        getmission(player1, player2);
-        console.log("player1 pick card" + player1.mission);
-        socket.emit("get_card", card[player1.mission]);
-      }
-      */
-      player1.actionReady = true;
+      player1.actionReady.basic = true;
       console.log("player1 done");
-    }else if(playerId==2 && !player2.actionReady){
+    }else if(playerId==2 && !player2.actionReady.basic){
       player2.getAction(action, item, caard);
-      /*
-      if(player2.action.card=="pick"){
-        player2.mission = 2; // 測試
-        getmission(player2, player1);
-        console.log("player2 pick card" + player2.mission);
-        console.log("p2 mission:" + player2.remaining);
-        socket.emit("get_card", card[player2.mission]);
-      }
-      */
-      player2.actionReady = true;
+      player2.actionReady.basic = true;
       console.log("player2 done");
     }
-    if(player1.actionReady && player2.actionReady){
+    if(player1.actionReady.basic && player2.actionReady.basic){
       var p1top2, p2top1;
       player1.totalDamage();
       p1top2 = player1.realDamage(player2);
@@ -209,53 +235,16 @@ io.on('connection', (socket) => {
       player2.takeDamage(p1top2);
       //血量判定
       io.emit("dmg", p1top2, p2top1, player1.action.basic, player2.action.basic);
-      if(player1.hp<=0 || player2.hp<=0){
-        if(player1.hp<player2.hp){
-          io.emit("game_over", 1); //player1 lose
-        }else if(player1.hp>player2.hp){
-          io.emit("game_over", 2); // player2 lose
-        }else{
-          io.emit("game_over", 0); // tieed
-        }
-      }
-      var p1_mission_state = "none", p2_mission_state = "none";
-      if(player1.mission>=0){
-        p1_mission_state = mission[player1.mission].mission_check(player1, player2);
-        if(p1_mission_state=="ongoing"){
-          io.emit("mission_ongoing", 1, player1.remaining);
-          console.log("pl mission ongoning");
-        }else if(p1_mission_state=="success"){
-          io.emit("mission_success", 1)
-          console.log("pl mission success");
-        }else if(p1_mission_state=="fail"){
-          io.emit("mission_failed", 1);
-          console.log("pl mission failed");
-        }
-      }else{
-        io.emit("noMission", 1);
-      }
-      if(player2.mission>=0){
-        p2_mission_state = mission[player2.mission].mission_check(player2, player1);
-        if(p2_mission_state=="ongoing"){
-          io.emit("mission_ongoing", 2, player2.remaining);
-          console.log("p2 mission ongoning");
-        }else if(p2_mission_state=="success"){
-          io.emit("mission_success", 2)
-          console.log("p2 mission success");
-        }else if(p2_mission_state=="fail"){
-          io.emit("mission_failed", 2);
-          console.log("p2 mission failed");
-        }
-      }else{
-        io.emit("noMission", 2);
-      }
-      
+      io.emit("next_round", player1, player2);
+      console.log(player1.damageNoDef.spike + " " + player2.damageNoDef.spike);
 
-      console.log("p1: " + player1.remaining + " p2: " + player2.remaining);
-
-      io.emit("next_round", 1, player1.hp, player1.atk, player1.def, player1.crit_rate);
-      io.emit("next_round", 2, player2.hp, player2.atk, player2.def, player2.crit_rate);
-      player1.actionReady = player2.actionReady = false;
+      if(!isGameOver(player1, player2)){
+        missionAction("check", player1, player2);
+        missionAction("check", player2, player1);
+        console.log("p1: " + player1.remaining + " p2: " + player2.remaining);
+        player1.actionReady.basic = player2.actionReady.basic = false;
+        player1.actionReady.mission = player2.actionReady.mission = false;
+      }
     }
   })
 });
