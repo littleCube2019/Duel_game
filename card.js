@@ -11,7 +11,7 @@ format
 
 
 */
-var card = [
+var missioncard = [
 {
 	id:10000,
 	type:"任務卡",
@@ -169,4 +169,4 @@ var card = [
 	description:"效果: 使用後造成單體5點傷害，使用後消失"
 },
 ]
-module.exports = card;
+module.exports = missioncard;

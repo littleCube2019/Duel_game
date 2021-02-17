@@ -4,8 +4,10 @@ var http = require('http').Server(app);
 var io = require('socket.io')(http);
 const e = require('express');
 var express = require('express');
-var card = require("./card.js");
+var missionCard = require("./missioncard.js");
+var itemCard = require("./itemcard.js");
 var mission = require("./mission.js");
+var item = require("./item.js");
 
 
 
@@ -21,6 +23,8 @@ http.listen(process.env.PORT || 3000, function(){
 
 app.use(express.static('public'));
 
+var missiontype = 5;
+var itemNum = 5;
 var missionIdToIndex={
   10000:0,
   10001:1,
@@ -48,16 +52,16 @@ class player {
   this.def = 1; //防禦力
   this.crit_rate = 0.5 //爆擊率
 
-  this.item = 0 ;  // 應該會放item卡的id
-  this.sprite =  0; //同上 精靈卡的id
-  this.mission = 0 ; //同上
-  this.nextMissionAvailable = {0:0, 1:0, 2:0, 3:0, 4:0}; //新增
+  this.item = -1;  // 應該會放item卡的id
+  this.sprite = -1; //同上 精靈卡的id
+  this.mission = -1; //同上
+  this.nextMissionAvailable = [0, 0, 0, 0]; //新增
   this.action = {"basic":"none", "item":"none", "card":"none"}; //使用者該回合採取的行動 (可能可以分為 0: 攻擊, 1:防守, 2:祈禱 ....)
   this.prevAction= "none"; //上一回合的行動
   this.damageDef={"normal": 0, "sprite":0 , "item":0 } //會計算對方防禦的傷害
   this.damageNoDef={"spike":0} // 不會計算對方防禦的傷害
   this.takenDamage={"normal": 0 , "spike":0, "sprite":0 , "item":0} // 承受傷害
-  this.remaining=1;
+  this.remaining=0;
   this.isCritical = false; // 是否爆擊
   this.actionReady = {"basic":false, "mission":false}; //是否完成一回合的行動
   this.state ={"stun":false} //玩家狀態
@@ -161,18 +165,19 @@ function chooseCharacter(id)
 // 隨機(暫定)
 function getRandomCard(player)
 { 
-  var main, sub, card;
+  var main=0, sub=0, card=0;
+  //main = 1;
   main = Math.ceil(Math.random()*2);
   if(main==1){
-    sub = Math.floor(Math.random()*4);
-    if(player.nextMissionAvailable!="done"){
+    sub = Math.floor(Math.random()*missiontype);
+    if(player.nextMissionAvailable!=-1){
       card = main*10000 + sub*10 + player.nextMissionAvailable[sub];
     }else{
       getRandomCard(player);
     }
   }else if(main==2){
     sub = Math.floor(Math.random()*itemNum);
-    caed = main*10000 + sub;
+    card = main*10000 + sub;
   }
   return card;
 };
@@ -182,26 +187,31 @@ function missionAction(action, me, enemy)
 {
   var state, cardId;
   if(action=="get" && !me.actionReady.mission){
-    //me.mission = me.cardAvailable[getRandomCard(me)];
-    cardId = 10000; //測試
-    if(cardId%10000==1){
+    cardId =getRandomCard(me);
+    console.log("cardid:" + cardId);
+    //cardId = 10000; //測試
+    if(cardId<20000){
       me.mission = missionIdToIndex[cardId];
       mission[me.mission].mission_start(me, enemy);
-      io.emit("mission_state", me, card[me.mission], "start");
+      io.emit("mission_state", me, missionCard[me.mission], "start");
+      console.log(me.id + " " + cardId);
       me.actionReady.mission = true;
+    }else if(cardId>=20000){
+      me.item = cardId-20000;
+      io.emit("item_state", me, itemCard[me.item], "get");
     }
   }else if(action=="discard"){
     if(me.mission>=0){
       state = mission[me.mission].mission_fail(me, enemy);
-      io.emit("mission_state", me, card[me.mission], "discard");
+      io.emit("mission_state", me, missionCard[me.mission], "discard");
     }
   }else if(action=="check"){
     if(me.mission>=0){
       state = mission[me.mission].mission_check(me, enemy);
-      io.emit("mission_state", me, card[me.mission], state);
+      io.emit("mission_state", me, missionCard[me.mission], state);
       console.log("player" + me.id + " mission " + state);
     }else{
-      io.emit("mission_state", me, card[me.mission], "noMission");
+      io.emit("mission_state", me, missionCard[me.mission], "noMission");
       console.log("player" + me.id + " has no mission");
     }
   }
@@ -209,12 +219,16 @@ function missionAction(action, me, enemy)
 
 function itemAction(action, me, enemy)
 {
-  if(action=="use"){
-    item[me.item].use(me, enemy);
-  }else if(action=="discard"){
-    item[me.item].discard(me, enemy);
+  if(me.item>=0){
+    if(action=="use" ){
+      item[me.item].use(me, enemy);
+    }else if(action=="discard"){
+      item[me.item].discard(me, enemy);
+    }
+    io.emit("item_state", me, item[me.item], action);
+  }else{
+    io.emit("item_state", me, 0, "no_item");
   }
-  io.emit("item_state", me, item[me.item], action);
 }
 
 function isGameOver(player1, player2){
@@ -232,13 +246,6 @@ function isGameOver(player1, player2){
   }
 }
 
-function pickCard(){ //testing
-  return Math.floor(Math.random()*5);
-};
-
-function getmission(me, enemy){
-  mission[me.mission].mission_start(me, enemy);
-};
 
 io.on('connection', (socket) => {
   newGame();
@@ -263,16 +270,17 @@ io.on('connection', (socket) => {
     }else if(id==2){
       missionAction(type, player2, player1);
     }
+    console.log(id + " " + player1.mission + " " + player2.mission);
   })
 
   //結算回合
-  socket.on("action_done", (playerId, action, item, caard)=>{
+  socket.on("action_done", (playerId, action, iteem, caard)=>{
     if(playerId==1 && !player1.actionReady.basic){
-      player1.getAction(action, item, caard);
+      player1.getAction(action, iteem, caard);
       player1.actionReady.basic = true;
       console.log("player1 done");
     }else if(playerId==2 && !player2.actionReady.basic){
-      player2.getAction(action, item, caard);
+      player2.getAction(action, iteem, caard);
       player2.actionReady.basic = true;
       console.log("player2 done");
     }
@@ -294,8 +302,8 @@ io.on('connection', (socket) => {
         missionAction("check", player1, player2);
         missionAction("check", player2, player1);
         console.log("p1 mission remain: " + player1.remaining + " p2 mission remain: " + player2.remaining);
-        player1.actionReady.basic = player2.actionReady.basic = false;
-        player1.actionReady.mission = player2.actionReady.mission = false;
+        player1.actionReady.basic = player1.actionReady.mission = false;
+        player2.actionReady.basic = player2.actionReady.mission = false;
       }
     }
   })
