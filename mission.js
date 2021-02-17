@@ -39,6 +39,7 @@ var mission = [
 		player.damageNoDef.spike+=1;
 		player.remining=0;
 		player.mission=-1; //mission remove 
+		player.nextMissionAvailable[0] = 1;
 		return "success";
 	},
 },
@@ -68,6 +69,7 @@ var mission = [
 		player.damageNoDef.spike+=1;
 		player.mission=-1; //mission remove
 		player.remining=0; 
+		player.nextMissionAvailable[0] = -1;
 		return "success";
 	},
 },
@@ -99,6 +101,7 @@ var mission = [
 		player.def+=1;
 		player.mission=-1; //mission remove 
 		player.remining=0;
+		player.nextMissionAvailable[1] = 1;
 		return "success";
 	},
 },
@@ -141,6 +144,7 @@ var mission = [
 		player.def+=2;
 		player.mission=-1; //mission remove 
 		player.remining=0;
+		player.nextMissionAvailable[1] = 2;
 		return "success";
 	},
 },
@@ -174,6 +178,7 @@ var mission = [
 		player.def+=3;
 		player.mission=-1; //mission remove 
 		player.remining=0;
+		player.nextMissionAvailable[1] = -1;
 		return "success";
 	},
 },
@@ -204,6 +209,7 @@ var mission = [
 		player.atk+=1;
 		player.mission=-1; //mission remove 
 		player.remaining=0;
+		player.nextMissionAvailable[2] = 1;
 		return "success";
 	},
 },
@@ -246,6 +252,7 @@ var mission = [
 		player.atk+=2;
 		player.mission=-1; //mission remove 
 		player.remaining=0;
+		player.nextMissionAvailable[2] = 2;
 		return "success";
 	},
 },
@@ -278,6 +285,7 @@ var mission = [
 		player.maxHp+=5;
 		player.mission=-1; //mission remove 
 		player.remaining=0;
+		player.nextMissionAvailable[3] = 1;
 		return "success";
 	},
 },
@@ -310,6 +318,7 @@ var mission = [
 		player.maxHp+=10;
 		player.mission=-1; //mission remove 
 		player.remaining=0;
+		player.nextMissionAvailable[3] = -1;
 		return "success";
 	},
 },
@@ -339,6 +348,7 @@ var mission = [
 		player.crit_rate+=0.1;
 		player.mission=-1; //mission remove 
 		player.remaining=0;
+		player.nextMissionAvailable[4] = 1;
 		return "success";
 	},
 },
@@ -368,6 +378,7 @@ var mission = [
 		player.crit_rate+=0.2;
 		player.mission=-1; //mission remove 
 		player.remaining=0;
+		player.nextMissionAvailable[4] = -1;
 		return "success";
 	},
 },
@@ -410,6 +421,7 @@ var mission = [
 		player.atk+=3;
 		player.mission=-1; //mission remove 
 		player.remining=0;
+		player.nextMissionAvailable[2] = -1;
 		return "success";
 	},
 },

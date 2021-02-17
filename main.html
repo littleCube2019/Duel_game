@@ -78,7 +78,7 @@
 			console.log(type);
 			if(playerId==player.id){
 				if(type=="start"){
-					addMessage("你抽到了卡片" + card.id);
+					addMessage("你抽到了任務" + card.id);
 					$("#mission_name").text("當前任務:" + card.name);
 					$("#mission_description").text(card.description);
 					$("#mission_remain").text("完成任務還需要:" + player.remaining);
@@ -93,6 +93,26 @@
 				}else if(type=="fail"){
 					addMessage("任務失敗");
 					mission_clear();
+				}
+			}
+		})
+
+		socket.on("item_state", (player, card, type)=>{
+			if(playerId==player.id){
+				if(type=="get"){
+					addMessage("你抽到了一個道具" + card.id);
+					$("#my_item").text("當前道具: " + card.name);
+					$("#my_item_content").text(card.description);
+				}else if(type=="use"){
+					addMessage("你使用了道具");
+					$("#my_item").text("當前道具: ");
+					$("#my_item_content").text();
+				}else if(type=="discard"){
+					addMessage("你丟棄用了道具");
+					$("#my_item").text("當前道具: ");
+					$("#my_item_content").text();
+				}else if(type=="no_card"){
+					addMessage("你沒有道具");
 				}
 			}
 		})
@@ -213,7 +233,8 @@
 				addMessage("你選擇使用道具");
 			});
 			$("#item_discard").click(()=>{
-				player_act.item = "del";
+				player_act.item = "discard";
+				addMessage("你選擇丟棄道具");
 			})
 
 			$("#pick_card").click(()=>{
