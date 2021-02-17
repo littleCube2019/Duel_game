@@ -6,7 +6,8 @@ const e = require('express');
 var express = require('express');
 var card = require("./card.js");
 var mission = require("./mission.js");
-var item = require("./item.js");
+
+
 
 
 
@@ -224,6 +225,14 @@ function isGameOver(player1, player2){
     return false;
   }
 }
+
+function pickCard(){ //testing
+  return Math.floor(Math.random()*5);
+};
+
+function getmission(me, enemy){
+  mission[me.mission].mission_start(me, enemy);
+};
 
 io.on('connection', (socket) => {
   newGame();

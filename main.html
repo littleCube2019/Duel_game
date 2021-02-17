@@ -9,16 +9,7 @@
 		<!--our css file -->
 		<link rel='stylesheet' href='Style.css'>
 
-		<!-- our js file here-->
-		<script language="JavaScript" src="card.js"></script>
-		<!-- a "card" object array name card-->
-		<script language="JavaScript" src="mission.js"></script>
-		<!-- a "mission" object array name mission-->
-		<script language="JavaScript" src="sprite.js"></script>
-		<!-- a "sprite" object array name sprite-->
-		<script language="JavaScript" src="item.js"></script>
-		<!-- a "item" object array name item-->
-		<!-- ==================================== -->
+	
 
 		<!-- module below-->
 		<!-- ==================================== -->
@@ -40,7 +31,7 @@
 
 		//message
 		var num_message = 0; 
-		var MAX_MESSAGE = 15; 
+		var MAX_MESSAGE = 19; 
 		function addMessage(Text){
 			if(num_message>= MAX_MESSAGE){
 				$("#message div:nth-child(1)").remove();
@@ -103,6 +94,36 @@
 					addMessage("任務失敗");
 					mission_clear();
 				}
+			}
+		})
+
+		socket.on("get_card", (card)=>{
+			console.log(typeof card);
+			addMessage("你抽到了卡片" + card.id);
+			$("#mission_name").text("當前任務:" + card.name);
+			$("#mission_description").text(card.description);
+		})
+
+		socket.on("mission_ongoing", (id, remain)=>{
+			if(playerId==id){
+				$("#mission_remain").text("完成任務還需要:" + remain);
+				console.log("mission ongoing");
+			}
+		})
+		socket.on("mission_success", (id)=>{
+			if(playerId==id){
+				addMessage("你完成了任務");
+				$("#mission_name").text("當前任務:無");
+				$("#mission_description").text("");
+				$("#mission_remain").text("");
+			}
+		})
+		socket.on("mission_failed", (id)=>{
+			if(playerId==id){
+				addMessage("任務失敗");
+				$("#mission_name").text("當前任務:無");
+				$("#mission_description").text("");
+				$("#mission_remain").text("");
 			}
 		})
 
@@ -193,7 +214,6 @@
 			});
 			$("#item_discard").click(()=>{
 				player_act.item = "del";
-				addMessage("你選擇丟棄道具");
 			})
 
 			$("#pick_card").click(()=>{

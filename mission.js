@@ -5,11 +5,12 @@ function sumOfObj(obj) {
 
 
 
+
 // outter only use mission_start and mission check
 
 var mission = [
 {
-	id:0,
+	id:10000,
 	preneed_id:[],
 	mission_start:(player,enemy)=>{
 		player.remaining = 3;
@@ -42,8 +43,8 @@ var mission = [
 	},
 },
 {
-	id:1,
-	preneed_id:[0],
+	id:10001,
+	preneed_id:[10000],
 	mission_start:(player,enemy)=>{
 		player.remaining = 3;
 	},
@@ -71,7 +72,7 @@ var mission = [
 	},
 },
 {
-	id:2,
+	id:10010,
 	preneed_id:[],
 	mission_start:(player,enemy)=>{
 		player.remaining = 3;
@@ -102,8 +103,8 @@ var mission = [
 	},
 },
 {
-	id:3,
-	preneed_id:[2],
+	id:10011,
+	preneed_id:[10010],
 	mission_start:(player,enemy)=>{
 		player.remaining = 3;
 	},
@@ -144,8 +145,8 @@ var mission = [
 	},
 },
 {
-	id:4,
-	preneed_id:[3],
+	id:10012,
+	preneed_id:[10011],
 	mission_start:(player,enemy)=>{
 		player.remaining = 3;
 	},
@@ -177,14 +178,14 @@ var mission = [
 	},
 },
 {
-	id:5,
+	id:10020,
 	preneed_id:[],
 	mission_start:(player,enemy)=>{
 		player.remaining = 3;
 	},
 	mission_check:(player,enemy)=>{
 		
-		if(player.action.basic=="atk"){ //action == defend
+		if(player.action.basic=="atk"){ //action == attack
 			player.remaining-=1;
 			if(player.remaining==0){
 				return mission[5].mission_success(player,enemy);
@@ -207,8 +208,8 @@ var mission = [
 	},
 },
 {
-	id:6,
-	preneed_id:[5],
+	id:10021,
+	preneed_id:[10020],
 	mission_start:(player,enemy)=>{
 		player.remaining = 3;
 	},
@@ -249,7 +250,7 @@ var mission = [
 	},
 },
 {
-	id:7,
+	id:10030,
 	preneed_id:[],
 	mission_start:(player,enemy)=>{
 		player.remaining = 3;
@@ -281,8 +282,8 @@ var mission = [
 	},
 },
 {
-	id:8,
-	preneed_id:[7],
+	id:10031,
+	preneed_id:[10030],
 	mission_start:(player,enemy)=>{
 		player.remaining = 5;
 	},
@@ -313,7 +314,7 @@ var mission = [
 	},
 },
 {
-	id:9,
+	id:10040,
 	preneed_id:[],
 	mission_start:(player,enemy)=>{
 		player.remaining = 2;
@@ -342,8 +343,8 @@ var mission = [
 	},
 },
 {
-	id:10,
-	preneed_id:[9],
+	id:10041,
+	preneed_id:[10040],
 	mission_start:(player,enemy)=>{
 		player.remaining = 4;
 	},
@@ -371,8 +372,8 @@ var mission = [
 	},
 },
 {
-	id:11,
-	preneed_id:[6],
+	id:10022,
+	preneed_id:[10021],
 	mission_start:(player,enemy)=>{
 		player.remaining = 4;
 	},

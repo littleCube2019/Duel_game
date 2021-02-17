@@ -13,7 +13,7 @@ format
 */
 var card = [
 {
-	id:1000,
+	id:10000,
 	type:"任務卡",
 	name:"荊棘試煉I",
 	description:"任務內容:採取 防禦 三次，\
@@ -23,7 +23,7 @@ var card = [
 	層數相等的傷害" 
 },
 {
-	id:1001,
+	id:10001,
 	type:"任務卡",
 	name:"荊棘試煉II",
 	description:"任務內容:(需完成荊棘試煉I)\
@@ -32,7 +32,7 @@ var card = [
 	獲得一層荊棘" 
 },
 {
-	id:1002,
+	id:10010,
 	type:"任務卡",
 	name:"銅牆鐵壁",
 	description:"任務內容:\
@@ -41,7 +41,7 @@ var card = [
 	防禦力+1" 
 },
 {
-	id:1003,
+	id:10011,
 	type:"任務卡",
 	name:"壁壘",
 	description:"任務內容:\
@@ -51,7 +51,7 @@ var card = [
 	防禦力+2" 
 },
 {
-	id:1004,
+	id:10012,
 	type:"任務卡",
 	name:"不動如山",
 	description:"任務內容:\
@@ -61,7 +61,7 @@ var card = [
 	防禦力+3" 
 },
 {
-	id:1005,
+	id:10020,
 	type:"任務卡",
 	name:"戰士試煉I",
 	description:"任務內容:\
@@ -70,7 +70,7 @@ var card = [
 	攻擊力+1" 
 },
 {
-	id:1006,
+	id:10021,
 	type:"任務卡",
 	name:"戰士試煉II",
 	description:"任務內容:\
@@ -80,7 +80,7 @@ var card = [
 	攻擊力+2" 
 },
 {
-	id:1007,
+	id:10030,
 	type:"任務卡",
 	name:"血之試煉I",
 	description:"任務內容:\
@@ -89,7 +89,7 @@ var card = [
 	最大生命值+5" 
 },
 {
-	id:1008,
+	id:10031,
 	type:"任務卡",
 	name:"血之試煉II",
 	description:"任務內容:\
@@ -98,7 +98,7 @@ var card = [
 	回報:\
 	最大生命值+10" 
 },
-{	id:1009,
+{	id:10040,
 	type:"任務卡",
 	name:"幸運試煉I",
 	description:"任務內容:\
@@ -106,7 +106,7 @@ var card = [
 	回報:\
 	爆擊率提升10%" 
 },
-{	id:1010,
+{	id:10041,
 	type:"任務卡",
 	name:"幸運試煉II",
 	description:"任務內容:\
@@ -114,7 +114,7 @@ var card = [
 	回報:\
 	爆擊率提升20%"
 },
-{	id:1011,
+{	id:10022,
 	type:"任務卡",
 	name:"合格戰士",
 	description:"任務內容:\
@@ -125,31 +125,31 @@ var card = [
 },
 
 {
-	id:2000,
+	id:20000,
 	type:"道具卡",
 	name:"草藥",
 	description:"使用後可以回復HP 5點,使用後消失" 
 },
 {
-	id:2001,
+	id:20001,
 	type:"道具卡",
 	name:"土製炸彈",
 	description:"使用後造成 敵方群體傷害3點，使用後消失"
 },
 {
-	id:2002,
+	id:20002,
 	type:"道具卡",
 	name:"鎖子甲",
 	description:"當此道具存在，防禦力+2"
 },
 {
-	id:2003,
+	id:20003,
 	type:"道具卡",
 	name:"煙幕彈",
 	description:"使用後該回合對方任意攻擊有50%機率無法造成傷害，使用後消失"
 },
 {
-	id:2004,
+	id:20004,
 	type:"道具卡",
 	name:"飛刀",
 	description:"效果: 使用後造成單體5點傷害，使用後消失"
