@@ -25,7 +25,7 @@ app.use(express.static('public'));
 
 var missiontype = 5;
 var itemNum = 5;
-var missionIdToIndex={
+var missionIdToIndex={ //共23張 (0~22)
   10000:0,
   10001:1,
   10010:2,
@@ -39,7 +39,16 @@ var missionIdToIndex={
   10041:10,
   10022:11,
   10050:12,
-  
+  10060:13,
+  10070:14,
+  10080:15,
+  10090:16,
+  10100:17,
+  10110:18,
+  10120:19,
+  10130:20,
+  10140:21,
+  10140:22,
 }
 
 class player {
@@ -64,7 +73,8 @@ class player {
   this.remaining=0;
   this.isCritical = false; // 是否爆擊
   this.actionReady = {"basic":false, "mission":false}; //是否完成一回合的行動
-  this.state ={"stun":false} //玩家狀態
+  this.state ={"stun":false,"rage":false,"undeath":false}; //玩家狀態
+  this.equip = false;
   }
 
 

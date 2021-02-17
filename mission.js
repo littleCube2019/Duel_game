@@ -458,6 +458,62 @@ var mission = [
 		return "success";
 	},
 },
+{
+	id:10060,
+	preneed_id:[],
+	mission_start:(player,enemy)=>{
+		player.remaining = 4;
+	},
+	mission_check:(player,enemy)=>{
+		
+		if(player.action.basic=="atk"){
+			player.hp-=1;
+			if(player.realDamage(enemy)>0){
+				player.remaining-=1;
+			}
+			if(player.remaining==0){
+				return mission[13].mission_success(player,enemy);
+			}			
+		}
+		return "ongoing";
+	
+	},
+	mission_fail:(player,enemy)=>{ // when violate the rule, or *discard* 
+		player.mission=-1;
+		player.remining=0;
+		return "fail";
+	},
+	mission_success:(player,enemy)=>{
+		player.state["rage"]=true; 
+		player.mission=-1; //mission remove 
+		player.remining=0;
+		return "success";
+	},
+},
+{
+	id:10070,
+	preneed_id:[],
+	mission_start:(player,enemy)=>{
+		
+	},
+	mission_check:(player,enemy)=>{
+		mission[14].mission_success(player,enemy);
+		return "ongoing";
+	
+	},
+	mission_fail:(player,enemy)=>{ // when violate the rule, or *discard* 
+		player.mission=-1; //mission remove 
+		player.remining=0;
+		return "fail";
+	},
+	mission_success:(player,enemy)=>{
+		player.state["undeath"]=true;
+		player.hp-=10; 
+		player.mission=-1; //mission remove 
+		player.remining=0;
+		return "success";
+	},
+},
 ]
 
 module.exports = mission;
