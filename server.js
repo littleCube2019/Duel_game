@@ -6,6 +6,7 @@ const e = require('express');
 var express = require('express');
 var card = require("./card.js");
 var mission = require("./mission.js");
+var item = require("./item.js");
 
 
 
@@ -19,6 +20,20 @@ http.listen(process.env.PORT || 3000, function(){
 
 app.use(express.static('public'));
 
+var missionIdToIndex={
+  10000:0,
+  10001:1,
+  10010:2,
+  10011:3,
+  10012:4,
+  10020:5,
+  10021:6,
+  10030:7,
+  10031:8,
+  10040:9,
+  10041:10,
+  10022:11,
+}
 
 class player {
 	constructor(playerId){
@@ -33,13 +48,14 @@ class player {
   this.item = 0 ;  // 應該會放item卡的id
   this.sprite =  0; //同上 精靈卡的id
   this.mission = 0 ; //同上
+  this.nextMissionAvailable = {0:0, 1:0, 2:0, 3:0, 4:0}; //新增
   this.action = {"basic":"none", "item":"none", "card":"none"}; //使用者該回合採取的行動 (可能可以分為 0: 攻擊, 1:防守, 2:祈禱 ....)
   this.prevAction= "none"; //上一回合的行動
   this.damageDef={"normal": 0, "sprite":0 , "item":0 } //會計算對方防禦的傷害
   this.damageNoDef={"spike":0} // 不會計算對方防禦的傷害
   this.takenDamage={"normal": 0 , "spike":0, "sprite":0 , "item":0} // 承受傷害
-  this.remaining=1
-  this.isCritical = false // 是否爆擊
+  this.remaining=1;
+  this.isCritical = false; // 是否爆擊
   this.actionReady = {"basic":false, "mission":false}; //是否完成一回合的行動
   }
   getAction(action, item, card){
@@ -61,11 +77,13 @@ class player {
     }else{
       this.damageDef.normal = 0;
     }
+    /*
     if(this.action.item=="use"){
       this.damageDef.item = this.item; //待補
     }else{
       this.damageDef.item = 0;
     }
+    */
   }
 
   // 實際總傷害:
@@ -73,9 +91,9 @@ class player {
     var sumDef=0, sumNoDef=0;
 
     //需考慮對方防禦
-    if(enemy.action=="def"){
+    if(enemy.action.basic=="def"){
       for(const k in this.damageDef){
-        enemy.takenDamage[k] = Math.max(this.damageDef[k]-enemy.def*1.5, 0);
+        enemy.takenDamage[k] = Math.ceil(Math.max(this.damageDef[k]-enemy.def*1.5, 0));
         sumDef += enemy.takenDamage[k];
       }
     }else{
@@ -89,11 +107,12 @@ class player {
     for(const k in this.damageNoDef){
       sumNoDef += this.damageNoDef[k];
     }
-    if(enemy.action!="atk"){
+    if(enemy.action.basic!="atk"){
       sumNoDef -= this.damageNoDef.spike;
     }else{
       enemy.takenDamage.spike = this.damageNoDef.spike;
     }
+    //console.log(this.id + " 荊棘:" + this.damageNoDef.spike + " 傷害:" + sumNoDef + " 敵人行動:" + enemy.action.basic);
     return sumDef + sumNoDef;
   }
 
@@ -112,7 +131,7 @@ class player {
     }
   }
 };
-var player1,player2;
+var player1 = new player(1),player2 = new player(2);
 
 function newGame()
 {
@@ -133,20 +152,37 @@ function chooseCharacter(id)
 }
 
 // 隨機(暫定)
-function getRandomCard()
+function getRandomCard(player)
 { 
-  return Math.floor(Math.random()*5);
+  var main, sub, card;
+  main = Math.ceil(Math.random()*2);
+  if(main==1){
+    sub = Math.floor(Math.random()*4);
+    if(player.nextMissionAvailable!="done"){
+      card = main*10000 + sub*10 + player.nextMissionAvailable[sub];
+    }else{
+      getRandomCard(player);
+    }
+  }else if(main==2){
+    sub = Math.floor(Math.random()*itemNum);
+    caed = main*10000 + sub;
+  }
+  return card;
 };
 
 // 任務處理
 function missionAction(action, me, enemy)
 {
-  var state;
+  var state, cardId;
   if(action=="get" && !me.actionReady.mission){
-    me.mission = getRandomCard();
-    mission[me.mission].mission_start(me, enemy);
-    io.emit("mission_state", me, card[me.mission], "start");
-    me.actionReady.mission = true;
+    //me.mission = me.cardAvailable[getRandomCard(me)];
+    cardId = 10000; //測試
+    if(cardId%10000==1){
+      me.mission = missionIdToIndex[cardId];
+      mission[me.mission].mission_start(me, enemy);
+      io.emit("mission_state", me, card[me.mission], "start");
+      me.actionReady.mission = true;
+    }
   }else if(action=="discard"){
     if(me.mission>=0){
       state = mission[me.mission].mission_fail(me, enemy);
@@ -233,15 +269,16 @@ io.on('connection', (socket) => {
       p2top1 = player2.realDamage(player1);
       player1.takeDamage(p2top1);
       player2.takeDamage(p1top2);
+      itemAction(player1.action.item, player1, player2);
+      itemAction(player2.action.item, player2, player1);
       //血量判定
       io.emit("dmg", p1top2, p2top1, player1.action.basic, player2.action.basic);
       io.emit("next_round", player1, player2);
-      console.log(player1.damageNoDef.spike + " " + player2.damageNoDef.spike);
 
       if(!isGameOver(player1, player2)){
         missionAction("check", player1, player2);
         missionAction("check", player2, player1);
-        console.log("p1: " + player1.remaining + " p2: " + player2.remaining);
+        console.log("p1 mission remain: " + player1.remaining + " p2 mission remain: " + player2.remaining);
         player1.actionReady.basic = player2.actionReady.basic = false;
         player1.actionReady.mission = player2.actionReady.mission = false;
       }
