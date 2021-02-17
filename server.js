@@ -34,6 +34,8 @@ var missionIdToIndex={
   10040:9,
   10041:10,
   10022:11,
+  10050:12,
+  
 }
 
 class player {
@@ -58,14 +60,18 @@ class player {
   this.remaining=1;
   this.isCritical = false; // 是否爆擊
   this.actionReady = {"basic":false, "mission":false}; //是否完成一回合的行動
+  this.state ={"stun":false} //玩家狀態
   }
+
+
+
   getAction(action, item, card){
     this.prevAction = this.action.basic;
     this.action.basic = action;
     this.action.item = item;
     this.action.card = card;
   }
-
+  
   // 造成傷害(未計算防禦)
   totalDamage(){
     if(this.action.basic=="atk"){

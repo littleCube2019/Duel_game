@@ -413,6 +413,39 @@ var mission = [
 		return "success";
 	},
 },
+{
+	id:10050,
+	preneed_id:[],
+	originMaxHp:0,
+	mission_start:(player,enemy)=>{
+		player.remaining = 3;
+		mission[12].originMaxHp=player.maxHp;
+		player.maxHp = 5;
+		player.hp=5;
+
+	},
+	mission_check:(player,enemy)=>{
+		player.remaining-=1;
+		if(player.remaining==0){
+			return mission[12].mission_success(player,enemy);
+		}
+		return "ongoing";
+	
+	},
+	mission_fail:(player,enemy)=>{ // when violate the rule, or *discard* 
+		player.maxHp=mission[12].originMaxHp; 
+		player.mission=-1;
+		player.remining=0;
+		return "fail";
+	},
+	mission_success:(player,enemy)=>{
+		player.maxHp=mission[12].originMaxHp+5; 
+		player.hp+=5;
+		player.mission=-1; //mission remove 
+		player.remining=0;
+		return "success";
+	},
+},
 ]
 
 module.exports = mission;
