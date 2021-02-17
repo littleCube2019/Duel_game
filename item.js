@@ -28,9 +28,11 @@ var item = [
 	id:2,
 	
 	use:(player,enemy)=>{
+		
+	},
+	equip:(player,enemy)=>{
 		player.def+=2;
 	},
-
 	discard:(player,enemy)=>{
 		player.def=Math.max(player.def-2,0);
 		player.item = -1;
