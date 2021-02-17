@@ -46,32 +46,55 @@
 			num_message+=1;
 		}
 
+		function mission_clear(){
+			$("#mission_name").text("當前任務:無");
+			$("#mission_description").text("");
+			$("#mission_remain").text("");
+		}
+
 		//選擇角色
 		socket.on("welcome",()=>{ //when start,hide the main page to let player select charcters.
 			$("#LEFT").hide();
 			$("#RIGHT").hide();
 		})
 
-		socket.on("pl1_choosed", ()=>{ 
-			$("#pl1").hide();
-		})
-		socket.on("pl2_choosed", ()=>{
-			$("#pl2").hide();
+		socket.on("player_choosed", (id)=>{ 
+			if(id==1){
+				$("#pl1").hide();
+			}else if(id==2){
+				$("#pl2").hide();
+			}
 		})
 		
 		// player finish selecting , game start and display main page
-		socket.on("start_game", (hp, atk, def, crit)=>{
+		socket.on("start_game", ()=>{
+			round = 1;
 			$("#choose_pl").hide();
 			$("#LEFT").show();
 			$("#RIGHT").show();
-			$("#my_hp").text(hp);
-			$("#my_atk").text(atk);
-			$("#my_def").text(def);
-			$("#my_crit").text(crit*100 + "%");
-			$("#enemy_hp").text(hp);
-			$("#enemy_atk").text(atk);
-			$("#enemy_def").text(def);
-			$("#enemy_crit").text(crit*100 + "%");
+		})
+
+		socket.on("mission_state", (player, card, type)=>{
+			console.log(type);
+			if(playerId==player.id){
+				if(type=="start"){
+					addMessage("你抽到了卡片" + card.id);
+					$("#mission_name").text("當前任務:" + card.name);
+					$("#mission_description").text(card.description);
+					$("#mission_remain").text("完成任務還需要:" + player.remaining);
+				}else if(type=="discard"){
+					addMessage("你放棄了任務");
+					mission_clear();
+				}else if(type=="ongoing"){
+					$("#mission_remain").text("完成任務還需要:" + player.remaining);
+				}else if(type=="success"){
+					addMessage("你完成了任務");
+					mission_clear();
+				}else if(type=="fail"){
+					addMessage("任務失敗");
+					mission_clear();
+				}
+			}
 		})
 
 		socket.on("get_card", (card)=>{
@@ -115,17 +138,25 @@
 				addMessage("敵方對你造成" + dmg1 + "點傷害");
 			}
 		});
-		socket.on("next_round", (id, hp, atk, def, crit)=>{  //更新雙方血量
-			if(playerId==id){
-				$("#my_hp").text(hp);
-				$("#my_atk").text(atk);
-				$("#my_def").text(def);
-				$("#my_crit").text(crit*100 + "%");
-			}else if(playerId!=id){
-				$("#enemy_hp").text(hp);
-				$("#enemy_atk").text(atk);
-				$("#enemy_def").text(def);
-				$("#enemy_crit").text(crit*100 + "%");
+		socket.on("next_round", (player1, player2)=>{  //更新雙方血量
+			if(playerId==player1.id){
+				$("#my_hp").text(player1.hp);
+				$("#my_atk").text(player1.atk);
+				$("#my_def").text(player1.def);
+				$("#my_crit").text(player1.crit_rate*100 + "%");
+				$("#enemy_hp").text(player2.hp);
+				$("#enemy_atk").text(player2.atk);
+				$("#enemy_def").text(player2.def);
+				$("#enemy_crit").text(player2.crit_rate*100 + "%");
+			}else if(playerId==player2.id){
+				$("#my_hp").text(player2.hp);
+				$("#my_atk").text(player2.atk);
+				$("#my_def").text(player2.def);
+				$("#my_crit").text(player2.crit_rate*100 + "%");
+				$("#enemy_hp").text(player1.hp);
+				$("#enemy_atk").text(player1.atk);
+				$("#enemy_def").text(player1.def);
+				$("#enemy_crit").text(player1.crit_rate*100 + "%");
 			}
 			round += 1;
 			$("#round").text(round);
@@ -135,37 +166,15 @@
 		})
 		socket.on("game_over", (loser)=>{
 			if(loser==0){
-				addMessage("平手");
+				alert("平手");
 			}else if(loser==playerId){
-				addMessage("你輸了");
+				alert("你輸了");
 			}else{
-				addMessage("你贏了");
+				alert("你贏了");
 			}
+			$("#LEFT").hide();
+			$("#RIGHT").hide();
 		})
-
-		/*
-		//更新每回合雙方血量
-		socket.on("update", (p1_hp, p2_hp, msg1, msg2)=>{
-			if(playerId==1){
-				$("#my_hp").text(p1_hp);
-				$("#enemy_hp").text(p2_hp);
-				addMessage("你對敵方" + msg2);
-				addMessage("敵方對你" + msg1);
-			}else if(playerId==2){
-				$("#my_hp").text(p2_hp);
-				$("#enemy_hp").text(p1_hp);
-				addMessage("你對敵方" + msg1);
-				addMessage("敵方對你" + msg2);
-			}
-			round += 1;
-			$("#round").text(round);
-		})
-
-		//顯示當回合選擇的行動
-		socket.on("act_ready", (type)=>{
-			addMessage("你選擇了" + type);
-		})
-		*/
 
 		$(document).ready(()=>{
 			//選擇玩家
@@ -205,22 +214,26 @@
 			});
 			$("#item_discard").click(()=>{
 				player_act.item = "del";
-				addMessage("你選擇丟棄道具");
-			})
-
-			$("#action_done").click(()=>{
-				socket.emit("action_done", playerId, player_act.action, player_act.item, player_act.card);
-				addMessage("你結束了這回合，等待對方行動");
-				player_act.action = player_act.item = player_act.card = "none";
 			})
 
 			$("#pick_card").click(()=>{
 				player_act.card = "pick";
-				socket.emit("pick_card", playerId);
+				socket.emit("mission_control", playerId, "get");
 			})
 
 			$("#mission_discard").click(()=>{
 				player_act.card = "discard";
+				socket.emit("mission_control", playerId, "discard");
+			})
+
+			$("#action_done").click(()=>{
+				if(player_act.action == "none"){
+					addMessage("請選擇行動");
+				}else{
+					socket.emit("action_done", playerId, player_act.action, player_act.item, player_act.card);
+					addMessage("你結束了這回合，等待對方行動");
+					player_act.action = player_act.item = player_act.card = "none";
+				}
 			})
 		});
 	</script>
@@ -248,10 +261,10 @@
         <div id="my_basic-data">
         	<!--基本數值-->
 			<div>回合數: 第<span id="round"> 1 </span>回合</div>
-			<div>HP: <span id="my_hp">  </span> </div>
-            <div>ATK: <span id="my_atk"></span> </div>
-			<div>DEF: <span id="my_def"></span> </div>
-			<div>Critical: <span id="my_crit"></span> </div>
+			<div>HP: <span id="my_hp"> 10 </span> </div>
+            <div>ATK: <span id="my_atk"> 1 </span> </div>
+			<div>DEF: <span id="my_def"> 1 </span> </div>
+			<div>Critical: <span id="my_crit"> 50% </span> </div>
 			<div>Critical Damage: <span id="my_crit_dmg">x2</span> </div>
         
         </div>
@@ -286,11 +299,11 @@
         <div id="enemy_basic-data">
         	<!--基本數值-->
 			<br>
-			<div>HP: <span id="enemy_hp">  </span> </div>
-            <div>ATK: <span id="enemy_atk"></span> </div>
-			<div>DEF: <span id="enemy_def"></span> </div>
-			<div>Critical: <span id="enemy_crit"></span> </div>
-			<div>Critical Damage: <span id="enemy_crit_dmg">X2</span> </div>
+			<div>HP: <span id="enemy_hp"> 10 </span> </div>
+            <div>ATK: <span id="enemy_atk"> 1 </span> </div>
+			<div>DEF: <span id="enemy_def"> 1 </span> </div>
+			<div>Critical: <span id="enemy_crit"> 50% </span> </div>
+			<div>Critical Damage: <span id="enemy_crit_dmg">x2</span> </div>
         
         </div>
 
@@ -382,9 +395,9 @@
 				</div>
 			</div> <!-- item_action 的closing tag-->
 
-			<div id="misson_action" class="interact-sector">任務操作
+			<div id="mission_action" class="interact-sector">任務操作
     			<div>
-					<button id="misson_discard" class="interact-button">放棄任務</button>
+					<button id="mission_discard" class="interact-button">放棄任務</button>
 					放棄執行當前任務
 				</div>
 				<div>
