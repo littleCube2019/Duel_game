@@ -62,7 +62,10 @@ class player {
   this.crit_rate = 0.5 //爆擊率
 
   this.item = -1;  // 應該會放item卡的id
-  this.sprite = -1; //同上 精靈卡的id
+  
+  this.sprite = -1;   //精靈id
+  this.spriteHp=0;
+
   this.mission = -1; //同上
   this.nextMissionAvailable = [0, 0, 0, 0]; //新增
   this.action = {"basic":"none", "item":"none", "card":"none"}; //使用者該回合採取的行動 (可能可以分為 0: 攻擊, 1:防守, 2:祈禱 ....)
@@ -73,8 +76,13 @@ class player {
   this.remaining=0;
   this.isCritical = false; // 是否爆擊
   this.actionReady = {"basic":false, "mission":false}; //是否完成一回合的行動
-  this.state ={"stun":false,"rage":false,"undeath":false}; //玩家狀態
-  this.equip = false;
+  this.state ={
+                "stun":false,
+                "rage":false,
+                "undeath":false,
+                "sprite_sacrifice":false,
+                "sprite_snail":false}; //玩家狀態
+  this.equip = false; //道具的裝備卡使用
   }
 
 
