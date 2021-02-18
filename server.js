@@ -50,6 +50,11 @@ var missionIdToIndex={ //共23張 (0~22)
   10140:21,
   10150:22,
 }
+const numOfSerialMission =  16;  //看上面object最大值的 千百十 +1
+const numOfItem =  6;  //道具總數
+var initailNotAvaiableMission =[11,12,13]; 
+//用在如  神與天罰系列在一開始不應被選到，解完基礎任務後會依次打開，但又不是系列關係
+//的任務奇怪關係上
 
 class player {
 	constructor(playerId){
@@ -62,26 +67,58 @@ class player {
   this.crit_rate = 0.5 //爆擊率
 
   this.item = -1;  // 應該會放item卡的id
-  
+  this.item2 = -1;  //第二個道具欄
+  this.itemRecord=[]; //紀錄道具使用次數
+  for(var temp=0; temp<numOfItem; temp++){
+      this.itemRecord.push(0); //所有道具一開始使用次數皆為0
+  }  
+
+
+
   this.sprite = -1;   //精靈id
   this.spriteHp=0;
 
   this.mission = -1; //同上
-  this.nextMissionAvailable = [0, 0, 0, 0]; //新增
+  
+
+  this.prayHealth=0; //祈禱回血量
+  this.prayRemaining=0; //祈禱效果影響時長
+
+  this.nextMissionAvailable =  [];  //系列任務
+  for(var temp=0; temp<numOfSerialMission; temp++){
+    if(initailNotAvaiableMission.includes(temp)){
+        this.nextMissionAvailable.push(-1); //如果在不應一開始被抽到的任務，設為-1
+    }
+    else{
+      this.nextMissionAvailable.push(0);  //其他就設為0，可以被選到起始任務
+    }
+  }  
+
+
   this.action = {"basic":"none", "item":"none", "card":"none"}; //使用者該回合採取的行動 (可能可以分為 0: 攻擊, 1:防守, 2:祈禱 ....)
   this.prevAction= "none"; //上一回合的行動
   this.damageDef={"normal": 0, "sprite":0 , "item":0 } //會計算對方防禦的傷害
   this.damageNoDef={"spike":0} // 不會計算對方防禦的傷害
   this.takenDamage={"normal": 0 , "spike":0, "sprite":0 , "item":0} // 承受傷害
-  this.remaining=0;
+  
+  this.remaining=0; //任務用暫存計數變數
+  this.tempObj={}; //任務用暫存物件
+
+  
   this.isCritical = false; // 是否爆擊
   this.actionReady = {"basic":false, "mission":false}; //是否完成一回合的行動
   this.state ={
                 "stun":false,
                 "rage":false,
                 "undeath":false,
+                "suckBlood":false,
                 "sprite_sacrifice":false,
-                "sprite_snail":false}; //玩家狀態
+                "sprite_snail":false, 
+                "canPray":false ,
+                "canRedBless":false,
+                "canBlueBless":false,
+                "secondItem":false,
+                "thief":false, }; //玩家狀態
   this.equip = false; //道具的裝備卡使用
   }
 
