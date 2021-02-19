@@ -455,6 +455,7 @@ var mission = [
 		player.hp+=5;
 		player.mission=-1; //mission remove 
 		player.remining=0;
+		player.nextMissionAvailable[5] = -1;
 		return "success";
 	},
 },

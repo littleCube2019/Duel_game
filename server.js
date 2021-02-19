@@ -38,15 +38,13 @@ var missionIdToIndex={
   10040:9,
   10041:10,
   10022:11,
-  10050:12,
-  
 }
 
 class player {
 	constructor(playerId){
 			// 以一個基本初始玩家為預設值
   this.id = playerId;  //區分玩家
-  this.hp = 4; //血量 
+  this.hp = 10; //血量 
   this.maxHp = 10; // 最大血量
   this.atk = 1; //攻擊力
   this.def = 1; //防禦力
@@ -58,24 +56,21 @@ class player {
   this.nextMissionAvailable = [0, 0, 0, 0]; //新增
   this.action = {"basic":"none", "item":"none", "card":"none"}; //使用者該回合採取的行動 (可能可以分為 0: 攻擊, 1:防守, 2:祈禱 ....)
   this.prevAction= "none"; //上一回合的行動
-  this.damageDef={"normal": 0, "sprite":0 , "item":0 } //會計算對方防禦的傷害
-  this.damageNoDef={"spike":0} // 不會計算對方防禦的傷害
-  this.takenDamage={"normal": 0 , "spike":0, "sprite":0 , "item":0} // 承受傷害
+  this.damageDef={"normal": 0, "sprite":0 } //會計算對方防禦的傷害
+  this.damageNoDef={"spike":0 , "item":0} // 不會計算對方防禦的傷害
+  this.takenDamage={"normal": 0, "sprite":0 , "spike":0 , "item":0} // 承受傷害
   this.remaining=0;
   this.isCritical = false; // 是否爆擊
   this.actionReady = {"basic":false, "mission":false}; //是否完成一回合的行動
-  this.state ={"stun":false} //玩家狀態
+  this.state = {"stun":false};
   }
-
-
-
   getAction(action, item, card){
     this.prevAction = this.action.basic;
     this.action.basic = action;
     this.action.item = item;
     this.action.card = card;
   }
-  
+
   // 造成傷害(未計算防禦)
   totalDamage(){
     if(this.action.basic=="atk"){
@@ -88,13 +83,6 @@ class player {
     }else{
       this.damageDef.normal = 0;
     }
-    /*
-    if(this.action.item=="use"){
-      this.damageDef.item = this.item; //待補
-    }else{
-      this.damageDef.item = 0;
-    }
-    */
   }
 
   // 實際總傷害:
@@ -195,11 +183,14 @@ function missionAction(action, me, enemy)
       mission[me.mission].mission_start(me, enemy);
       io.emit("mission_state", me, missionCard[me.mission], "start");
       console.log(me.id + " " + cardId);
-      me.actionReady.mission = true;
     }else if(cardId>=20000){
       me.item = cardId-20000;
       io.emit("item_state", me, itemCard[me.item], "get");
+      if(typeof item[me.item].equip(me, enemy) !== "undefined"){
+        item[me.item].equip(me, enemy);
+      }
     }
+    me.actionReady.mission = true;
   }else if(action=="discard"){
     if(me.mission>=0){
       state = mission[me.mission].mission_fail(me, enemy);
@@ -274,26 +265,30 @@ io.on('connection', (socket) => {
   })
 
   //結算回合
-  socket.on("action_done", (playerId, action, iteem, caard)=>{
+  socket.on("action_done", (playerId, basic_act, item_act, card_act)=>{
     if(playerId==1 && !player1.actionReady.basic){
-      player1.getAction(action, iteem, caard);
+      player1.getAction(basic_act, item_act, card_act);
       player1.actionReady.basic = true;
       console.log("player1 done");
     }else if(playerId==2 && !player2.actionReady.basic){
-      player2.getAction(action, iteem, caard);
+      player2.getAction(basic_act, item_act, card_act);
       player2.actionReady.basic = true;
       console.log("player2 done");
     }
     if(player1.actionReady.basic && player2.actionReady.basic){
       var p1top2, p2top1;
+      itemAction(player1.action.item, player1, player2);
+      itemAction(player2.action.item, player2, player1);
+      if(!player1.state.stun){
+        player1.totalDamage();
+        p1top2 = player1.realDamage(player2);
+      }
       player1.totalDamage();
       p1top2 = player1.realDamage(player2);
       player2.totalDamage();
       p2top1 = player2.realDamage(player1);
       player1.takeDamage(p2top1);
       player2.takeDamage(p1top2);
-      itemAction(player1.action.item, player1, player2);
-      itemAction(player2.action.item, player2, player1);
       //血量判定
       io.emit("dmg", p1top2, p2top1, player1.action.basic, player2.action.basic);
       io.emit("next_round", player1, player2);
@@ -302,9 +297,11 @@ io.on('connection', (socket) => {
         missionAction("check", player1, player2);
         missionAction("check", player2, player1);
         console.log("p1 mission remain: " + player1.remaining + " p2 mission remain: " + player2.remaining);
-        player1.actionReady.basic = player1.actionReady.mission = false;
-        player2.actionReady.basic = player2.actionReady.mission = false;
+
+        player1.actionReady.basic = player1.actionReady.mission = player1.state.stun = false;
+        player2.actionReady.basic = player2.actionReady.mission = player2.state.stun = false;
       }
+      
     }
   })
 });

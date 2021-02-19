@@ -77,18 +77,19 @@ var item = [
 	id:5,
 	
 	use:(player,enemy)=>{
-		if (Math.random() >= 0.9){
-			enemy.state["stun"] = true;
-		}
 	},
 
 
 	turn_end:(player,enemy)=>{
 		enemy.state["stun"] = false;
+		if (Math.random() >= 0.9){
+			enemy.state["stun"] = true;
+		}
 	},
 
 	discard:(player,enemy)=>{
 		player.item = -1;
+		enemy.state["stun"] = false;
 	},
 
 }
