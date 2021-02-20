@@ -558,6 +558,7 @@ io.on('connection', (socket) => {
         console.log("玩家2狀態 暈眩:"+player2.state.rage+"不死:"+player2.state.undeath+"吸血:"+player2.state.suckBlood+"盾精靈:"+player2.state.sprite_sacrifice
                     +"蝸精靈:"+player2.state.sprite_snail+"祈禱:"+player2.state.canPray+"赤紅:"+player2.state.canRedBless+"靛藍:"+player2.state.canBlueBless
                     +"2道具:"+player2.state.secondItem+"小偷:"+player2.state.thief);
+        console.log("test");
       }
 
     }
