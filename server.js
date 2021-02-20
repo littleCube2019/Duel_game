@@ -111,7 +111,7 @@ class player {
     }else{
       enemy.takenDamage.spike = this.damageNoDef.spike;
     }
-    //console.log(this.id + " 荊棘:" + this.damageNoDef.spike + " 傷害:" + sumNoDef + " 敵人行動:" + enemy.action.basic);
+    console.log(this.id + " 荊棘:" + this.damageNoDef.spike + " 傷害:" + sumNoDef + " 敵人行動:" + enemy.action.basic);
     return sumDef + sumNoDef;
   }
 
