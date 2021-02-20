@@ -8,6 +8,7 @@ var missionCard = require("./missioncard.js");
 var itemCard = require("./itemcard.js");
 var mission = require("./mission.js");
 var item = require("./item.js");
+const itemcard = require('./itemcard.js');
 
 
 
@@ -138,9 +139,21 @@ class player {
       }else{
         this.damageDef.normal = this.atk;
       }
-    }else{
-      this.damageDef.normal = 0;
+     //=========================================狀態:rage==============================================
+     if(this.state.rage){
+      console.log("玩家" + this.id + "觸發rage");
+      this.critical();
+      if(this.isCritical){
+        this.damageDef.normal += this.atk * 2;
+      }else{
+        this.damageDef.normal += this.atk;
+      }
     }
+    //=================================================================================================
+  }else{
+    this.damageDef.normal = 0;
+  }
+
     /*
     if(this.action.item=="use"){
       this.damageDef.item = this.item; //待補
@@ -166,6 +179,12 @@ class player {
         sumDef += enemy.takenDamage[k];
       }
     }
+     //==============================================狀態:suckblood===================================
+     if(this.state.suckBlood){
+      console.log("玩家" + this.id + "觸發suckblood");
+      this.hp = Math.max(this.maxHp, this.hp + enemy.takenDamage.normal);
+    }
+    //=================================================================================================
 
     //不需考慮對方防禦
     for(const k in this.damageNoDef){
@@ -182,7 +201,15 @@ class player {
 
   //造成傷害
   takeDamage(realDamage){
-    this.hp = this.hp - realDamage;
+    //=================================狀態:sprite_sacrifice========================================
+    if(this.state.sprite_sacrifice){
+      console.log("玩家" + this.id + "觸發sprite_sacrifice");
+      this.hp -= Math.max(0, realDamage - this.spriteHp);
+      this.spriteHp = Math.max(0, this.spriteHp - realDamage);
+      //=========================================================================================
+    }else{
+      this.hp = this.hp - realDamage;
+    }
   }
 
   //判斷爆擊成功
@@ -243,13 +270,27 @@ function getRandomCard(player, type)
 // 任務處理
 function missionAction(action, me, enemy)
 {
-  var state, cardId;
+  var state, card1Id, card2Id;
   if(action=="get" && !me.actionReady.mission){
-    card1Id =getRandomCard(me,"mission");
-    card2Id =getRandomCard(me,"item");
-    console.log("cardid:" + cardId);
+    card1Id = getRandomCard(me, "mission");
+    card2Id = getRandomCard(me, "item");
+    console.log("card1id:" + card1Id);
+    console.log("card2id:" + card2Id);
     io.emit("choose_card", me.id,  missionCard[missionIdToIndex[card1Id]], itemCard[card2Id-20000]);
-    
+    //cardId = 10000; //測試
+    /*
+    if(cardId<20000){
+      me.mission = missionIdToIndex[cardId];
+      mission[me.mission].mission_start(me, enemy);
+      io.emit("mission_state", me, missionCard[me.mission], "start");
+      console.log(me.id + " " + cardId);
+      me.actionReady.mission = true;
+    }else if(cardId>=20000){
+      me.item = cardId-20000;
+      io.emit("item_state", me, itemCard[me.item], "get");
+    }
+    me.actionReady.mission = true;
+    */
   }else if(action=="discard"){
     if(me.mission>=0){
       state = mission[me.mission].mission_fail(me, enemy);
@@ -270,10 +311,14 @@ function missionAction(action, me, enemy)
 function itemAction(action, me, enemy)
 {
   if(me.item>=0){
-    if(action=="use" ){
+    if(action=="use"){
       item[me.item].use(me, enemy);
     }else if(action=="discard"){
       item[me.item].discard(me, enemy);
+    }else if(action=="use_2"){
+      item[me.item2].use(me, enemy);
+    }else if(action=="discard_2"){
+      item[me.item2].discard(me, enemy);
     }
     io.emit("item_state", me, item[me.item], action);
   }else{
@@ -281,21 +326,110 @@ function itemAction(action, me, enemy)
   }
 }
 
+
+//========================================狀態:stun========================================
 function playerStun(me, enemy){
   if(me.item>=0){
     if(typeof item[me.item].turn_end != "undefined"){
       item[me.item].turn_end(me, enemy);
       if(enemy.state.stun){
         console.log("玩家" + enemy.id + "被擊暈");
-      }else{
-        console.log("玩家" + enemy.id + "沒有被擊暈");
       }
     }
   }
 }
+//=================================================================================================
 
 
+//=====================================狀態:undeath===============================================
+function isUndeath(pl)
+{
+  if(pl.hp<=0){
+    if(pl.state.undeath){
+      if(pl.maxHp>1){
+        pl.hp = Math.ceil(pl.maxHp/2);
+        pl.atk = Math.max(1, pl.atk-1);
+        console.log("玩家" + pl.id + "觸發了不死");
+      }
+    }
+  }
+}
+//=================================================================================================
+
+
+//=====================================狀態:bless==================================================
+function bless(me, type)
+{
+  if(type=="start"){
+    if(me.state.canRedBless){
+      me.atk += 2;
+      me.prayRemaining = 4;
+      console.log("玩家" + me.id + "觸發了赤色祝福");
+      io.emit("other_msg", me.id, "你觸發了赤色祝福，接下來3回合攻擊+2");
+    }else if(me.state.canBlueBless){
+      me.def += 2;
+      me.prayRemaining = 4;
+      console.log("玩家" + me.id + "觸發了靛色祝福，接下來3回合攻擊+2");
+      io.emit("other_msg", me.id, "你觸發了靛色祝福，接下來3回合防禦+2");
+    }
+  }else if(type=="check"){
+    if(me.state.prayRemaining>0){
+      me.state.prayRemaining -= 1;
+      io.emit("pray_state", 1, me.state.prayRemaining);
+      console.log("玩家" + me.id + "的祈禱效果剩餘" + me.state.prayRemaining + "回合");
+      if(me.state.prayRemaining==0){
+        if(me.state.canRedBless){
+          me.atk -= 2;
+        }else{
+          me.def -= 2;
+        }
+      }
+    }
+  }
+}
+//================================================================================================
+
+//=================================狀態:小偷=======================================================
+function isThief(me, enemy)
+{
+  var stole = false;
+  var itemId = 0, place = 0;
+  if(me.state.thief && me.action.basic){
+    stole = Math.floor(Math.random()*4);
+    if(stole==1){
+      if(enemy.item==-1 && enemy.item2==-1){
+        place = "noCard";
+      }else if(enemy.item!=-1 && enemy.item2!=-1){
+        if(Math.ceil(Math.random()*2)==1){
+          itemId = enemy.item;
+        }else{
+          itemId = enemy.item2;
+        }
+      }else if(enemy.item!=-1 && enemy.item==1){
+        itemId = enemy.item;
+      }
+      if(me.item==-1){
+        place = 1;
+        me.item = itemcard[itemId];
+      }else if((me.item!=-1 && !me.state.secondItem) || (me.item!=-1 && me.item2!=-1)){
+        place = 0;
+      }else if(me.item!=-1 && me.state.secondItem && me.item2==-1){
+        place = 2;
+        me.item2 = itemcard[itemId];
+      }
+    }else{
+      place = "fail";
+    }
+    io.emit("stolen_card", me.id, itemcard[itemId], place);
+    console.log("玩家" + me.id + "數據: " + place + " " + itemId);
+  }
+}
+//===============================================================================================================================
+
+//==================================================遊戲結束======================================================================
 function isGameOver(player1, player2){
+  isUndeath(player1);
+  isUndeath(player2);
   if(player1.hp<=0 || player2.hp<=0){
     if(player1.hp<player2.hp){
       io.emit("game_over", player1.id); //player1 lose
@@ -309,7 +443,7 @@ function isGameOver(player1, player2){
     return false;
   }
 }
-
+//==================================================================================================================================
 
 io.on('connection', (socket) => {
   newGame();
@@ -317,7 +451,7 @@ io.on('connection', (socket) => {
   console.log('Client connected');
   socket.on('disconnect', () => console.log('Client disconnected'));
 
-  //選角
+//============================================================選角==================================================================
   socket.on("choose_character", (id)=>{
     chooseCharacter(id);
     if(player1.actionReady.basic && player2.actionReady.basic){
@@ -326,8 +460,9 @@ io.on('connection', (socket) => {
       console.log("start game");
     }
   });
+ //==================================================================================================================================
 
-  //任務
+  //============================================================任務控制==============================================================
   socket.on("mission_control", (id, type)=>{ 
     if(id==1){
       missionAction(type, player1, player2);
@@ -336,6 +471,9 @@ io.on('connection', (socket) => {
     }
     console.log(id + " " + player1.mission + " " + player2.mission);
   })
+    //==================================================================================================================================
+
+  //============================================================完成行動==============================================================
 
   socket.on("choose_card_result",(playerId,cardId)=>{
       var me ={} ;
@@ -372,13 +510,21 @@ io.on('connection', (socket) => {
       player2.actionReady.basic = true;
       console.log("player2 done");
     }
+     //================================================================================================================================
 
     //==================================================回合結算======================================================================
     if((player1.actionReady.basic || player1.state.stun) && (player2.actionReady.basic || player2.state.stun)){
       var p1top2, p2top1;
+      
+    //===================================================狀態:小偷===================================================================
+    isThief(player1, player2);
+    isThief(player2, player1);
+
       //======================================================道具結算=================================================================
       itemAction(player1.action.item, player1, player2);
       itemAction(player2.action.item, player2, player1);
+       //================================================================================================================================
+
       //=======================================================行動結算 && 精靈結算====================================================
       if(!player1.state.stun){
         player1.totalDamage();
@@ -406,13 +552,43 @@ io.on('connection', (socket) => {
         player1.actionReady.basic = player1.actionReady.mission = player1.state.stun = false;
         player2.actionReady.basic = player2.actionReady.mission = player2.state.stun = false;
 
-        //====================================================狀態======================================================================
-        playerStun(player1, player2);
-        playerStun(player2, player1);
-        io.emit("get_stuned", player1.state.stun, player2.state.stun);
+//====================================================狀態:stun, snail, canpray======================================================================
+         playerStun(player1, player2);
+        playerStun(player2, player1);  
+        io.emit("player_state", player1.id, player1.state.stun, player1.state.sprite_snail, player1.state.canPray);
+        io.emit("player_state", player2.id, player2.state.stun, player2.state.sprite_snail, player2.state.canPray);
+        //==================================================================================================================================
+
+        //====================================================狀態:bless====================================================================
+        if(player1.action.basic=="pray"){
+          bless(player1, "start");
+        }
+        if(player2.action.basic=="pray"){
+          bless(player2, "start");
+        }
+        
+        bless(player1, "check");
+        bless(player2, "check");
+        //==================================================================================================================
+
+        //====================================================狀態:seconditem===============================================
+        if(player1.state.secondItem){
+          io.emit("second_item_show", player1.id);
+        }
+        if(player2.state.secondItem){
+          io.emit("second_item_show", player2.id);
+        }
+        //==================================================================================================================
+
+        //=====================================================狀態總結======================================================
+        console.log("玩家1狀態 暈眩:"+player1.state.rage+"不死:"+player1.state.undeath+"吸血:"+player1.state.suckBlood+"盾精靈:"+player1.state.sprite_sacrifice
+                    +"蝸精靈:"+player1.state.sprite_snail+"祈禱:"+player1.state.canPray+"赤紅:"+player1.state.canRedBless+"靛藍:"+player1.state.canBlueBless
+                    +"2道具:"+player1.state.secondItem+"小偷:"+player1.state.thief);
+        console.log("玩家2狀態 暈眩:"+player2.state.rage+"不死:"+player2.state.undeath+"吸血:"+player2.state.suckBlood+"盾精靈:"+player2.state.sprite_sacrifice
+                    +"蝸精靈:"+player2.state.sprite_snail+"祈禱:"+player2.state.canPray+"赤紅:"+player2.state.canRedBless+"靛藍:"+player2.state.canBlueBless
+                    +"2道具:"+player2.state.secondItem+"小偷:"+player2.state.thief);
       }
 
     }
   })
 })
-

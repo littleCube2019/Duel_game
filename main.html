@@ -29,7 +29,7 @@
 		var round = 1;
 		var player_act = {"action":"none", "item":"none", "card":"none"};
 		var playerId;
-		var stun = false;
+		var isStun = false;
 		//選卡用的暫存變數id
 		var tempItemCard = -1 ; 
 		var tempMissionCard = -1;
@@ -95,6 +95,11 @@
 			}
 		})
 
+		socket.on("other_msg", (id, msg)=>{
+			if(playerId==id){
+				addMessage(msg);
+			}
+		})
 
 		socket.on("mission_state", (player, card, type)=>{
 			console.log(type);
@@ -191,28 +196,6 @@
 			$(".RIGHT").hide();
 		})
 
-		socket.on("get_stun", (p1stun, p2stun)=>{
-			if(playerId==1){
-				stun = p1stun;
-				if(p1stun){
-					addMessage("你被暈眩");
-				}
-				if(p2stun){
-					addMessage("敵人被暈眩");
-				}
-			}else if(playerId==2){
-				stun = p2stun;
-				if(p2stun){
-					addMessage("你被暈眩");
-				}
-				if(p1stun){
-					addMessage("敵人被暈眩");
-				}
-			}
-		})
-
-
-
 		socket.on("choose_card",(id,missionCard,itemCard)=>{
 			if(playerId==id){
 				$("#left_choice_name").text(missionCard.name);
@@ -222,11 +205,9 @@
 				tempMissionCard=missionCard.id;
 				tempItemCard=itemCard.id;
 			}
-
 		})
 
-		socket.on("stolen_card",(id,itemCard,state)=>{
-					
+		socket.on("stolen_card",(id,itemCard,state)=>{				
 				if(playerId==id){
 					if(state=="noCard"){
 						addMessage("你朝著對手的口袋進攻，但對方口袋是空的，甚麼都沒偷到!");
@@ -262,29 +243,40 @@
 	    						$("#item_sub_deny").show()
 							}
 						}
-
-
-			
-				
-	
 					}
 			}
 		})
 
+		socket.on("player_state", (id, stun, snail, canPray)=>{
+			if(playerId==id){
+				if(stun){
+					isStun = true;
+				}else{
+					isStun = false;
+				}
+				if(snail){
+					$("#action_atk").hide();
+					addMessage("蝸居狀態下無法攻擊");
+				}else{
+					$("#action_atk").show();
+				}
+				if(canpray){
+					$("#action_pray").show();
+				}else{
+					$("#action_pray").hide();
+				}
 
+			}
+		})
+
+		socket.on("pray_state", (id, prayRemain)=>{
+			if(playerId==id){
+				addMessage("祝福還剩下" + prayRemain + "回合");
+			}
+		})
+		
 
 		$(document).ready(()=>{
-			//替換道具的彈出視窗
-			
-
-			
-
-
-
-
-
-
-
 			//選擇玩家
 			$("#pl1").click(()=>{
 				playerId = 1;
@@ -314,15 +306,29 @@
 				$("#show_action").text("防禦");
 				socket.emit("choose_action", "def", playerId);
 			});
+			$("#action_pray").click(()=>{
+				player_act.action = "pray";
+				addMessage("你選擇了祈禱");
+				$("#show_action").text("祈禱");
+			})
 
 			//選擇道具
 			$("#item_use").click(()=>{
 				player_act.item = "use";
-				addMessage("你選擇使用道具");
+				addMessage("你選擇使用道具1");
 			});
 			$("#item_discard").click(()=>{
 				player_act.item = "discard";
-				addMessage("你選擇丟棄道具");
+				addMessage("你選擇丟棄道具1");
+			})
+
+			$("#item_use_2").click(()=>{
+				player_act.item = "use_2";
+				addMessage("你選擇使用道具2");
+			});
+			$("#item_discard_2").click(()=>{
+				player_act.item = "discard_2";
+				addMessage("你選擇丟棄道具2");
 			})
 
 			$("#pick_card").click(()=>{
@@ -337,7 +343,7 @@
 			})
 
 			$("#action_done").click(()=>{
-				if(stun){
+				if(isStun){
 					addMessage("被暈眩無法行動");
 				}else if(player_act.action == "none"){
 					addMessage("請選擇行動");
@@ -347,7 +353,6 @@
 					player_act.action = player_act.item = player_act.card = "none";
 				}
 			})
-
 			$("#choose_left").click(()=>{
 					$('#draw_card_pop').hide();
 					socket.emit("choose_card_result",playerId,tempMissionCard);
@@ -389,73 +394,70 @@
 			})
 
 		});
-
-
-		
-			
 	</script>
 
 	<body>
 	
-<!-- draw card pop out window ============================================================== -->
+		<!-- draw card pop out window ============================================================== -->
 	<div class='pop_window' id="draw_card_pop">
-    <div class='pop_center'>
-     
-        <div class="window_title">抽卡介面</div>
-        <div>
-	        <div class="LEFT">
-		        <div class='window_title' style="text-align:left;left:10px;"  >任務卡:<span id="left_choice_name"></span></div>
-		        <div class="status_content" id="left_choice_description" style="height:60%"  > </div>
-		        <button class="choice_button" id="choose_left">選擇!</button>
-	        </div>
-
-	        <div class="RIGHT">
-
-		        <div class='window_title'  style="text-align:left;left:10px;"  >道具卡:<span id="right_choice_name"></span></div>
-		        <div class="status_content" id="right_choice_description" style="height:60%"> </div>
-		        <button class="choice_button" id="choose_right">選擇!</button>
-
-
-	        </div>
-    	</div>
-    </div>
-	</div>
-<!-- draw card pop out window ============================================================== -->
-
-<!-- choose item pop out window ============================================================== -->
-<div class='pop_window' id="item_sub_pop">
-    <div class='pop_center'>
-     
-        <div class="window_title" >替換介面</div>
-        <div style="height:60%; width:100%">
-	        
-
+		<div class='pop_center'>
+		 
+			<div class="window_title">抽卡介面</div>
+			<div>
+				<div class="LEFT">
+					<div class='window_title' style="text-align:left;left:10px;"  >任務卡:<span id="left_choice_name"></span></div>
+					<div class="status_content" id="left_choice_description" style="height:60%"  > </div>
+					<button class="choice_button" id="choose_left">選擇!</button>
+				</div>
 	
-
-		        <div class='window_title'  style="text-align:left;left:10px;"  >對方道具卡:<span id="item_sub_choice_name"></span></div>
-		        <div class="status_content" id="item_sub_choice_description" style="height:60%"> </div>
+				<div class="RIGHT">
+	
+					<div class='window_title'  style="text-align:left;left:10px;"  >道具卡:<span id="right_choice_name"></span></div>
+					<div class="status_content" id="right_choice_description" style="height:60%"> </div>
+					<button class="choice_button" id="choose_right">選擇!</button>
+	
+	
+				</div>
+			</div>
+		</div>
+		</div>
+	<!-- draw card pop out window ============================================================== -->
+	
+	<!-- choose item pop out window ============================================================== -->
+	<div class='pop_window' id="item_sub_pop">
+		<div class='pop_center'>
+		 
+			<div class="window_title" >替換介面</div>
+			<div style="height:60%; width:100%">
+				
+	
 		
-    	</div>
-    	
-    	<div id="sub_item_button_sector">
- 			<button class="choice_button" id="item_sub_accept_1">接收</button>
-	    	<button class="choice_button" id="item_sub_accept_2">接收2</button>
-	    	<button class="choice_button" id="item_sub_deny">拒絕</button>
-    	</div>
-    	
-
-    
-    </div>
-</div>
-
-
-
-
-
-<!-- choose item pop out window ============================================================== -->
-
-
-
+	
+					<div class='window_title'  style="text-align:left;left:10px;"  >對方道具卡:<span id="item_sub_choice_name"></span></div>
+					<div class="status_content" id="item_sub_choice_description" style="height:60%"> </div>
+			
+			</div>
+			
+			<div id="sub_item_button_sector">
+				 <button class="choice_button" id="item_sub_accept_1">接收</button>
+				<button class="choice_button" id="item_sub_accept_2">接收2</button>
+				<button class="choice_button" id="item_sub_deny">拒絕</button>
+			</div>
+			
+	
+		
+		</div>
+	</div>
+	
+	
+	
+	
+	
+	<!-- choose item pop out window ============================================================== -->
+	
+	
+	
+	
 
 	<div id="choose_pl">
 		<p id="pl">請選擇角色</p>
@@ -471,10 +473,10 @@
 
     <!-- our status showing below-->
 	<!-- ==================================== -->
-		<div class="LEFT_TOP">
+	<div class="LEFT_TOP">
 		<!--屬性欄，此div為最外框-->
     	<div id="my_status" >我方當前狀態 
-    		
+
         <div id="my_basic-data">
         	<!--基本數值-->
 			<div>回合數: 第<span id="round"> 1 </span>回合</div>
@@ -500,6 +502,7 @@
 		<div id="my_item_2" >道具欄: 空</div>
 		
 		<div id="my_item_content_2" class="status_content"></div>
+
 		
 	
 	    
@@ -592,7 +595,12 @@
     			<div>
 				<button id="action_def" class="interact-button">防禦</button>
 				此回合提升50%防禦力
-				</div>                       
+				</div>      
+				
+				<div>
+				<button id="action_pray" class="interact-button">祈禱</button>
+				祈禱的敘述(待補)
+				</div> 
 
 				<div>
 				當前採取行動為: <span id="show_action" style="color:red"> </span>
