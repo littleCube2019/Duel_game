@@ -118,35 +118,6 @@
 			}
 		})
 
-		socket.on("get_card", (card)=>{
-			console.log(typeof card);
-			addMessage("你抽到了卡片" + card.id);
-			$("#mission_name").text("當前任務:" + card.name);
-			$("#mission_description").text(card.description);
-		})
-
-		socket.on("mission_ongoing", (id, remain)=>{
-			if(playerId==id){
-				$("#mission_remain").text("完成任務還需要:" + remain);
-				console.log("mission ongoing");
-			}
-		})
-		socket.on("mission_success", (id)=>{
-			if(playerId==id){
-				addMessage("你完成了任務");
-				$("#mission_name").text("當前任務:無");
-				$("#mission_description").text("");
-				$("#mission_remain").text("");
-			}
-		})
-		socket.on("mission_failed", (id)=>{
-			if(playerId==id){
-				addMessage("任務失敗");
-				$("#mission_name").text("當前任務:無");
-				$("#mission_description").text("");
-				$("#mission_remain").text("");
-			}
-		})
 
 		socket.on("dmg", (dmg1, dmg2, p1Action, p2Action)=>{ // 顯示上回合造成得傷害
 			if(playerId==1){
@@ -195,6 +166,26 @@
 			}
 			$("#LEFT").hide();
 			$("#RIGHT").hide();
+		})
+
+		socket.on("get_stun", (p1stun, p2stun)=>{
+			if(playerId==1){
+				stun = p1stun;
+				if(p1stun){
+					addMessage("你被暈眩");
+				}
+				if(p2stun){
+					addMessage("敵人被暈眩");
+				}
+			}else if(playerId==2){
+				stun = p2stun;
+				if(p2stun){
+					addMessage("你被暈眩");
+				}
+				if(p1stun){
+					addMessage("敵人被暈眩");
+				}
+			}
 		})
 
 		$(document).ready(()=>{
@@ -249,7 +240,9 @@
 			})
 
 			$("#action_done").click(()=>{
-				if(player_act.action == "none"){
+				if(stun){
+					addMessage("被暈眩無法行動");
+				}else if(player_act.action == "none"){
 					addMessage("請選擇行動");
 				}else{
 					socket.emit("action_done", playerId, player_act.action, player_act.item, player_act.card);
