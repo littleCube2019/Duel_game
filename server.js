@@ -254,7 +254,11 @@ function missionAction(action, me, enemy)
     }else if(cardId>=20000){
       me.item = cardId-20000;
       io.emit("item_state", me, itemCard[me.item], "get");
+      if(typeof item[me.item].equip(me, enemy) !== "undefined"){
+        item[me.item].equip(me, enemy);
+      }
     }
+    me.actionReady.mission = true;
   }else if(action=="discard"){
     if(me.mission>=0){
       state = mission[me.mission].mission_fail(me, enemy);
@@ -285,6 +289,17 @@ function itemAction(action, me, enemy)
     io.emit("item_state", me, 0, "no_item");
   }
 }
+
+function playerStun(me, enemy){
+  if(typeof item[me.item].turn_end(me, enemy) !== "undefined"){
+    item[me.item].turn_end(me, enemy);
+    if(enemy.state.stun){
+      console.log("玩家" + enemy.id + "被擊暈");
+    }else{
+      console.log("玩家" + enemy.id + "沒有被擊暈");
+    }
+}
+
 
 function isGameOver(player1, player2){
   if(player1.hp<=0 || player2.hp<=0){
@@ -329,40 +344,57 @@ io.on('connection', (socket) => {
   })
 
   //結算回合
-  socket.on("action_done", (playerId, action, iteem, caard)=>{
+  socket.on("action_done", (playerId, basic_act, item_act, card_act)=>{
     if(playerId==1 && !player1.actionReady.basic){
-      player1.getAction(action, iteem, caard);
+      player1.getAction(basic_act, item_act, card_act);
       player1.actionReady.basic = true;
       console.log("player1 done");
     }else if(playerId==2 && !player2.actionReady.basic){
-      player2.getAction(action, iteem, caard);
+      player2.getAction(basic_act, item_act, card_act);
       player2.actionReady.basic = true;
       console.log("player2 done");
     }
-    if(player1.actionReady.basic && player2.actionReady.basic){
+
+    //==================================================回合結算======================================================================
+    if((player1.actionReady.basic || player1.state.stun) && (player2.actionReady.basic || player2.state.stun)){
       var p1top2, p2top1;
-      player1.totalDamage();
-      p1top2 = player1.realDamage(player2);
-      player2.totalDamage();
-      p2top1 = player2.realDamage(player1);
-      player1.takeDamage(p2top1);
-      player2.takeDamage(p1top2);
+      //======================================================道具結算=================================================================
       itemAction(player1.action.item, player1, player2);
       itemAction(player2.action.item, player2, player1);
+      //=======================================================行動結算 && 精靈結算====================================================
+      if(!player1.state.stun){
+        player1.totalDamage();
+        p1top2 = player1.realDamage(player2);
+      }
+      if(!player2.sprite.stun){
+        player2.totalDamage();
+        p2top1 = player2.realDamage(player1);
+      }
+      //========================================================傷害結算===============================================================
+      player1.takeDamage(p2top1);
+      player2.takeDamage(p1top2);
       //血量判定
       io.emit("dmg", p1top2, p2top1, player1.action.basic, player2.action.basic);
       io.emit("next_round", player1, player2);
 
+      //=======================================================判斷輸贏================================================================
       if(!isGameOver(player1, player2)){
+        //=====================================================任務檢查====================================================================
         missionAction("check", player1, player2);
         missionAction("check", player2, player1);
         console.log("p1 mission remain: " + player1.remaining + " p2 mission remain: " + player2.remaining);
-        player1.actionReady.basic = player1.actionReady.mission = false;
-        player2.actionReady.basic = player2.actionReady.mission = false;
+
+        //=====================================================狀態還原====================================================
+        player1.actionReady.basic = player1.actionReady.mission = player1.state.stun = false;
+        player2.actionReady.basic = player2.actionReady.mission = player2.state.stun = false;
+
+        //====================================================狀態======================================================================
+        playerStun(player1, player2);
+        playerStun(player2, player1);
+        io.emit("get_stuned", player1.state.stun, player2.state.stun);
       }
+
     }
   })
-});
-
-
+})
 

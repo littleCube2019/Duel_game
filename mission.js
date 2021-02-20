@@ -454,6 +454,9 @@ var mission = [
 		player.hp+=5;
 		player.mission=-1; //mission remove 
 		player.remining=0;
+<<<<<<< HEAD
+		player.nextMissionAvailable[5] = -1;
+=======
 		player.nextMissionAvailable[5]=-1;
 		return "success";
 	},
@@ -514,6 +517,7 @@ var mission = [
 		player.remining=0;
 		
 		player.nextMissionAvailable[7]=-1;
+>>>>>>> d2aa68b5bdd9a801aa47fd3b73bb8f79b1e527ce
 		return "success";
 	},
 },
