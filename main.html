@@ -24,11 +24,16 @@
 	</head>
 	
 	<script>
+
 		let socket = io();
 		var round = 1;
 		var player_act = {"action":"none", "item":"none", "card":"none"};
 		var playerId;
 		var stun = false;
+		//選卡用的暫存變數id
+		var tempItemCard = -1 ; 
+		var tempMissionCard = -1;
+	    var Item2Available = false;
 
 		//message
 		var num_message = 0; 
@@ -55,8 +60,8 @@
 
 		//選擇角色
 		socket.on("welcome",()=>{ //when start,hide the main page to let player select charcters.
-			$("#LEFT").hide();
-			$("#RIGHT").hide();
+			$(".LEFT").hide();
+			$(".RIGHT").hide();
 		})
 
 		socket.on("player_choosed", (id)=>{ 
@@ -71,15 +76,31 @@
 		socket.on("start_game", ()=>{
 			round = 1;
 			$("#choose_pl").hide();
-			$("#LEFT").show();
-			$("#RIGHT").show();
+			$(".LEFT").show();
+			$(".RIGHT").show();
+			$("#my_item_2").hide();
+			$("#my_item_content_2").hide();
+			$("#item_sub_accept_1").hide();
+	    	$("#item_sub_accept_2").hide();
+	    	$("#item_sub_deny").hide();
 		})
+
+		socket.on("second_item_show", (id)=>{
+			if(playerId==id){
+				addMessage("你撿到了百寶袋!");
+				addMessage("獲得了另一個道具欄!");
+				$("#my_item_2").show();
+				$("#my_item_content_2").show();
+				Item2Available=true;
+			}
+		})
+
 
 		socket.on("mission_state", (player, card, type)=>{
 			console.log(type);
 			if(playerId==player.id){
 				if(type=="start"){
-					addMessage("你抽到了任務" + card.id);
+					addMessage("你接下了任務" + card.id);
 					$("#mission_name").text("當前任務:" + card.name);
 					$("#mission_description").text(card.description);
 					$("#mission_remain").text("完成任務還需要:" + player.remaining);
@@ -155,6 +176,8 @@
 			player_act.action = "none";
 			player_act.item = "none";
 			player_act.card = "none";
+
+			$('#pick_card').prop('disabled', false); //打開抽卡鈕 
 		})
 		socket.on("game_over", (loser)=>{
 			if(loser==0){
@@ -164,8 +187,8 @@
 			}else{
 				alert("你贏了");
 			}
-			$("#LEFT").hide();
-			$("#RIGHT").hide();
+			$(".LEFT").hide();
+			$(".RIGHT").hide();
 		})
 
 		socket.on("get_stun", (p1stun, p2stun)=>{
@@ -188,7 +211,80 @@
 			}
 		})
 
+
+
+		socket.on("choose_card",(id,missionCard,itemCard)=>{
+			if(playerId==id){
+				$("#left_choice_name").text(missionCard.name);
+				$("#left_choice_description").text(missionCard.description);
+				$("#right_choice_name").text(itemCard.name);
+				$("#right_choice_description").text(itemCard.description);
+				tempMissionCard=missionCard.id;
+				tempItemCard=itemCard.id;
+			}
+
+		})
+
+		socket.on("stolen_card",(id,itemCard,state)=>{
+					
+				if(playerId==id){
+					if(state=="noCard"){
+						addMessage("你朝著對手的口袋進攻，但對方口袋是空的，甚麼都沒偷到!");
+					}
+
+					else if(state=="fail"){
+						addMessage("你朝著對手的口袋進攻，但被俐落的躲開了");
+					}
+					else{
+						tempItemCard=itemCard;
+						addMessage("靠著精巧的技術，你偷到了對方的道具");
+						
+						if(state==1){ //道具放在第一個
+							$("#my_item").text("當前道具: " + itemCard.name);
+							$("#my_item_content").text(itemCard.description);
+						}
+
+						if(state==2){ //道具放在第二個
+							$("#my_item_2").text("當前道具: " + itemCard.name);
+							$("#my_item_content_2").text(itemCard.description);
+						}
+
+						if(state==0){ //替換道具
+							$(".item_sub_pop").show();
+
+							if(Item2Available){
+								$("#item_sub_accept_1").show()
+	    						$("#item_sub_accept_2").show()
+	    						$("#item_sub_deny").show()
+							}
+							else{
+								$("#item_sub_accept_1").show()
+	    						$("#item_sub_deny").show()
+							}
+						}
+
+
+			
+				
+	
+					}
+			}
+		})
+
+
+
 		$(document).ready(()=>{
+			//替換道具的彈出視窗
+			
+
+			
+
+
+
+
+
+
+
 			//選擇玩家
 			$("#pl1").click(()=>{
 				playerId = 1;
@@ -231,6 +327,7 @@
 
 			$("#pick_card").click(()=>{
 				player_act.card = "pick";
+				$('#draw_card_pop').show();  //彈出選卡視窗	
 				socket.emit("mission_control", playerId, "get");
 			})
 
@@ -250,11 +347,116 @@
 					player_act.action = player_act.item = player_act.card = "none";
 				}
 			})
+
+			$("#choose_left").click(()=>{
+					$('#draw_card_pop').hide();
+					socket.emit("choose_card_result",playerId,tempMissionCard);
+					addMessage("你選擇了卡片"+tempMissionCard);
+					$('#pick_card').prop('disabled', true); //關掉抽卡鈕
+				}
+			)
+
+			$("#choose_right").click(()=>{
+					$('#draw_card_pop').hide();
+					socket.emit("choose_card_result",playerId,tempItemCard);
+					addMessage("你選擇了卡片"+tempItemCard);
+					$('#pick_card').prop('disabled', true); //關掉抽卡鈕
+			})
+		
+
+			
+			$("#item_sub_deny").click(()=>{ //
+				$("#item_sub_pop").hide();
+				addMessage("你覺得對方的道具沒什麼價值，將它扔的遠遠的");
+				socket.emit("item_sub_result", playerId,0,tempItemCard.id );
+			})
+
+			$("#item_sub_accept_1").click(()=>{
+				$("#item_sub_pop").hide();
+				console.log("water in fire whyyy?")
+				$("#my_item").text("當前道具: " + tempItemCard.name);
+				$("#my_item_content").text(tempItemCard.description);
+				addMessage("你將偷來的對方道具放入自己口袋之中");
+				socket.emit("item_sub_result",playerId, 1,tempItemCard.id );
+			})
+
+			$("#item_sub_accept_2").click(()=>{
+				$("#item_sub_pop").hide();
+				$("#my_item_2").text("當前道具: " + tempItemCard.name);
+				$("#my_item_content_2").text(tempItemCard.description);
+				addMessage("你將偷來的對方道具放入自己口袋之中");
+				socket.emit("item_sub_result", playerId,2,tempItemCard.id );
+			})
+
 		});
+
+
+		
+			
 	</script>
 
 	<body>
 	
+<!-- draw card pop out window ============================================================== -->
+	<div class='pop_window' id="draw_card_pop">
+    <div class='pop_center'>
+     
+        <div class="window_title">抽卡介面</div>
+        <div>
+	        <div class="LEFT">
+		        <div class='window_title' style="text-align:left;left:10px;"  >任務卡:<span id="left_choice_name"></span></div>
+		        <div class="status_content" id="left_choice_description" style="height:60%"  > </div>
+		        <button class="choice_button" id="choose_left">選擇!</button>
+	        </div>
+
+	        <div class="RIGHT">
+
+		        <div class='window_title'  style="text-align:left;left:10px;"  >道具卡:<span id="right_choice_name"></span></div>
+		        <div class="status_content" id="right_choice_description" style="height:60%"> </div>
+		        <button class="choice_button" id="choose_right">選擇!</button>
+
+
+	        </div>
+    	</div>
+    </div>
+	</div>
+<!-- draw card pop out window ============================================================== -->
+
+<!-- choose item pop out window ============================================================== -->
+<div class='pop_window' id="item_sub_pop">
+    <div class='pop_center'>
+     
+        <div class="window_title" >替換介面</div>
+        <div style="height:60%; width:100%">
+	        
+
+	
+
+		        <div class='window_title'  style="text-align:left;left:10px;"  >對方道具卡:<span id="item_sub_choice_name"></span></div>
+		        <div class="status_content" id="item_sub_choice_description" style="height:60%"> </div>
+		
+    	</div>
+    	
+    	<div id="sub_item_button_sector">
+ 			<button class="choice_button" id="item_sub_accept_1">接收</button>
+	    	<button class="choice_button" id="item_sub_accept_2">接收2</button>
+	    	<button class="choice_button" id="item_sub_deny">拒絕</button>
+    	</div>
+    	
+
+    
+    </div>
+</div>
+
+
+
+
+
+<!-- choose item pop out window ============================================================== -->
+
+
+
+
 	<div id="choose_pl">
 		<p id="pl">請選擇角色</p>
 		<button id="pl1">player1</button>
@@ -263,16 +465,16 @@
 
 
 	<!-- Display section below -->
-	<div id="LEFT">
+	<div class="LEFT">
 	
 	
 
     <!-- our status showing below-->
 	<!-- ==================================== -->
-		<div id="LEFT_TOP">
+		<div class="LEFT_TOP">
 		<!--屬性欄，此div為最外框-->
     	<div id="my_status" >我方當前狀態 
-
+    		
         <div id="my_basic-data">
         	<!--基本數值-->
 			<div>回合數: 第<span id="round"> 1 </span>回合</div>
@@ -295,7 +497,9 @@
 		
 		<div id="my_item_content" class="status_content"></div>
 		
-
+		<div id="my_item_2" >道具欄: 空</div>
+		
+		<div id="my_item_content_2" class="status_content"></div>
 		
 	
 	    
@@ -355,11 +559,11 @@
 
 	<!-- all buttons or something user interaction below-->
 	<!-- ==================================== -->
-	<div id="LEFT_BOTTOM">
+	<div class="LEFT_BOTTOM">
 		<div id="mission_sector">
 			<div id="my_mission">當前任務:</div>
 				
-			<div id="my_mission_content" class="status_content">
+			<div  style="height:60%" class="status_content">
 				<div id="mission_name"></div>
 				<div id="mission_description"></div>
 				<div id="mission_remain"></div>
@@ -396,7 +600,7 @@
 
     			
 			</div> <!-- turn_action 的closing tag-->
-
+			<br>
 			<div id="item_action" class="interact-sector">
 			道具欄操作<br>
 				<div>
@@ -439,7 +643,7 @@
 
 </div> <!-- id=LEFT  ending here-->
 
-<div id="RIGHT">
+<div class="RIGHT">
 <!-- show message below--> 
 		<!-- ==================================== -->
 		

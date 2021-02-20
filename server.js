@@ -216,22 +216,27 @@ function chooseCharacter(id)
 }
 
 // 隨機(暫定)
-function getRandomCard(player)
+function getRandomCard(player, type)
 { 
   var main=0, sub=0, card=0;
   //main = 1;
-  main = Math.ceil(Math.random()*2);
+  if(type=="mission"){
+    main = 1;
+  }else if(type=="item"){
+    main = 2;
+  }
   if(main==1){
     sub = Math.floor(Math.random()*numOfSerialMission);
-    if(player.nextMissionAvailable!=-1){
+    if(player.nextMissionAvailable[sub]!=-1){
       card = main*10000 + sub*10 + player.nextMissionAvailable[sub];
     }else{
-      getRandomCard(player);
+      getRandomCard(player, "mission");
     }
   }else if(main==2){
     sub = Math.floor(Math.random()*numOfItem);
     card = main*10000 + sub;
   }
+  console.log(main,sub,player.nextMissionAvailable[sub]);
   return card;
 };
 
@@ -240,20 +245,11 @@ function missionAction(action, me, enemy)
 {
   var state, cardId;
   if(action=="get" && !me.actionReady.mission){
-    cardId =getRandomCard(me);
+    card1Id =getRandomCard(me,"mission");
+    card2Id =getRandomCard(me,"item");
     console.log("cardid:" + cardId);
-    //cardId = 10000; //測試
-    if(cardId<20000){
-      me.mission = missionIdToIndex[cardId];
-      mission[me.mission].mission_start(me, enemy);
-      io.emit("mission_state", me, missionCard[me.mission], "start");
-      console.log(me.id + " " + cardId);
-      me.actionReady.mission = true;
-    }else if(cardId>=20000){
-      me.item = cardId-20000;
-      io.emit("item_state", me, itemCard[me.item], "get");
-    }
-    me.actionReady.mission = true;
+    io.emit("choose_card", me.id,  missionCard[missionIdToIndex[card1Id]], itemCard[card2Id-20000]);
+    
   }else if(action=="discard"){
     if(me.mission>=0){
       state = mission[me.mission].mission_fail(me, enemy);
@@ -339,6 +335,30 @@ io.on('connection', (socket) => {
       missionAction(type, player2, player1);
     }
     console.log(id + " " + player1.mission + " " + player2.mission);
+  })
+
+  socket.on("choose_card_result",(playerId,cardId)=>{
+      var me ={} ;
+      var enemy={};
+      if(playerId == 1){
+        me=player1;
+        enemy=player2;
+      }
+      else if(playerId == 2){
+        me=player2;
+        enemy=player1;
+      }
+      if(cardId<20000){
+        me.mission = missionIdToIndex[cardId];
+        mission[me.mission].mission_start(me, enemy);
+        io.emit("mission_state", me, missionCard[me.mission], "start");
+        console.log(me.id + " " + cardId);
+        me.actionReady.mission = true;
+      }else if(cardId>=20000){
+        me.item = cardId-20000;
+        io.emit("item_state", me, itemCard[me.item], "get");
+      }
+      me.actionReady.mission = true;
   })
 
   //結算回合
