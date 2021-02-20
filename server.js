@@ -23,8 +23,6 @@ http.listen(process.env.PORT || 3000, function(){
 
 app.use(express.static('public'));
 
-var missiontype = 5;
-var itemNum = 5;
 var missionIdToIndex={ //共23張 (0~22)
   10000:0,
   10001:1,
@@ -224,14 +222,14 @@ function getRandomCard(player)
   //main = 1;
   main = Math.ceil(Math.random()*2);
   if(main==1){
-    sub = Math.floor(Math.random()*missiontype);
+    sub = Math.floor(Math.random()*numOfSerialMission);
     if(player.nextMissionAvailable!=-1){
       card = main*10000 + sub*10 + player.nextMissionAvailable[sub];
     }else{
       getRandomCard(player);
     }
   }else if(main==2){
-    sub = Math.floor(Math.random()*itemNum);
+    sub = Math.floor(Math.random()*numOfItem);
     card = main*10000 + sub;
   }
   return card;
@@ -254,9 +252,6 @@ function missionAction(action, me, enemy)
     }else if(cardId>=20000){
       me.item = cardId-20000;
       io.emit("item_state", me, itemCard[me.item], "get");
-      if(typeof item[me.item].equip(me, enemy) !== "undefined"){
-        item[me.item].equip(me, enemy);
-      }
     }
     me.actionReady.mission = true;
   }else if(action=="discard"){
@@ -291,13 +286,16 @@ function itemAction(action, me, enemy)
 }
 
 function playerStun(me, enemy){
-  if(typeof item[me.item].turn_end(me, enemy) !== "undefined"){
-    item[me.item].turn_end(me, enemy);
-    if(enemy.state.stun){
-      console.log("玩家" + enemy.id + "被擊暈");
-    }else{
-      console.log("玩家" + enemy.id + "沒有被擊暈");
+  if(me.item>=0){
+    if(typeof item[me.item].turn_end != "undefined"){
+      item[me.item].turn_end(me, enemy);
+      if(enemy.state.stun){
+        console.log("玩家" + enemy.id + "被擊暈");
+      }else{
+        console.log("玩家" + enemy.id + "沒有被擊暈");
+      }
     }
+  }
 }
 
 

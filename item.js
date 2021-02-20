@@ -85,17 +85,9 @@ var item = [
 
 	turn_end:(player,enemy)=>{
 		enemy.state["stun"] = false;
-<<<<<<< HEAD
-		if (Math.random() >= 0.9){
-			enemy.state["stun"] = true;
-		}
-=======
-		
 		if (Math.random() >= 0.9){
 		   enemy.state["stun"] = true;
 		}
-		
->>>>>>> d2aa68b5bdd9a801aa47fd3b73bb8f79b1e527ce
 	},
 
 	discard:(player,enemy)=>{
