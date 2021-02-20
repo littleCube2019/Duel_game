@@ -28,13 +28,16 @@ var item = [
 	id:2,
 	
 	use:(player,enemy)=>{
+		if(player.equip== false){
+			player.def+=2;
+			player.equip = true;
+		}
 		
 	},
-	equip:(player,enemy)=>{
-		player.def+=2;
-	},
+	
 	discard:(player,enemy)=>{
 		player.def=Math.max(player.def-2,0);
+		player.equip = false;
 		player.item = -1;
 	},
 
@@ -75,16 +78,24 @@ var item = [
 },
 {
 	id:5,
-	
+
 	use:(player,enemy)=>{
 	},
 
 
 	turn_end:(player,enemy)=>{
 		enemy.state["stun"] = false;
+<<<<<<< HEAD
 		if (Math.random() >= 0.9){
 			enemy.state["stun"] = true;
 		}
+=======
+		
+		if (Math.random() >= 0.9){
+		   enemy.state["stun"] = true;
+		}
+		
+>>>>>>> d2aa68b5bdd9a801aa47fd3b73bb8f79b1e527ce
 	},
 
 	discard:(player,enemy)=>{

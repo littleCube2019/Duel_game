@@ -11,7 +11,6 @@ function sumOfObj(obj) {
 var mission = [
 {
 	id:10000,
-	preneed_id:[],
 	mission_start:(player,enemy)=>{
 		player.remaining = 3;
 	},
@@ -45,7 +44,7 @@ var mission = [
 },
 {
 	id:10001,
-	preneed_id:[10000],
+
 	mission_start:(player,enemy)=>{
 		player.remaining = 3;
 	},
@@ -75,7 +74,7 @@ var mission = [
 },
 {
 	id:10010,
-	preneed_id:[],
+
 	mission_start:(player,enemy)=>{
 		player.remaining = 3;
 	},
@@ -107,7 +106,7 @@ var mission = [
 },
 {
 	id:10011,
-	preneed_id:[10010],
+
 	mission_start:(player,enemy)=>{
 		player.remaining = 3;
 	},
@@ -150,7 +149,7 @@ var mission = [
 },
 {
 	id:10012,
-	preneed_id:[10011],
+
 	mission_start:(player,enemy)=>{
 		player.remaining = 3;
 	},
@@ -184,7 +183,7 @@ var mission = [
 },
 {
 	id:10020,
-	preneed_id:[],
+
 	mission_start:(player,enemy)=>{
 		player.remaining = 3;
 	},
@@ -215,7 +214,7 @@ var mission = [
 },
 {
 	id:10021,
-	preneed_id:[10020],
+
 	mission_start:(player,enemy)=>{
 		player.remaining = 3;
 	},
@@ -258,7 +257,7 @@ var mission = [
 },
 {
 	id:10030,
-	preneed_id:[],
+
 	mission_start:(player,enemy)=>{
 		player.remaining = 3;
 	},
@@ -291,7 +290,7 @@ var mission = [
 },
 {
 	id:10031,
-	preneed_id:[10030],
+
 	mission_start:(player,enemy)=>{
 		player.remaining = 5;
 	},
@@ -324,7 +323,7 @@ var mission = [
 },
 {
 	id:10040,
-	preneed_id:[],
+
 	mission_start:(player,enemy)=>{
 		player.remaining = 2;
 	},
@@ -354,7 +353,7 @@ var mission = [
 },
 {
 	id:10041,
-	preneed_id:[10040],
+
 	mission_start:(player,enemy)=>{
 		player.remaining = 4;
 	},
@@ -384,7 +383,7 @@ var mission = [
 },
 {
 	id:10022,
-	preneed_id:[10021],
+
 	mission_start:(player,enemy)=>{
 		player.remaining = 4;
 	},
@@ -427,7 +426,7 @@ var mission = [
 },
 {
 	id:10050,
-	preneed_id:[],
+
 	originMaxHp:0,
 	mission_start:(player,enemy)=>{
 		player.remaining = 3;
@@ -455,10 +454,308 @@ var mission = [
 		player.hp+=5;
 		player.mission=-1; //mission remove 
 		player.remining=0;
+<<<<<<< HEAD
 		player.nextMissionAvailable[5] = -1;
+=======
+		player.nextMissionAvailable[5]=-1;
 		return "success";
 	},
 },
+{
+	id:10060,
+
+	mission_start:(player,enemy)=>{
+		player.remaining = 4;
+	},
+	mission_check:(player,enemy)=>{
+		
+		if(player.action.basic=="atk"){
+			player.hp-=1;
+			if(player.realDamage(enemy)>0){
+				player.remaining-=1;
+			}
+			if(player.remaining==0){
+				return mission[13].mission_success(player,enemy);
+			}			
+		}
+		return "ongoing";
+	
+	},
+	mission_fail:(player,enemy)=>{ // when violate the rule, or *discard* 
+		player.mission=-1;
+		player.remining=0;
+		return "fail";
+	},
+	mission_success:(player,enemy)=>{
+		player.state["rage"]=true; 
+		player.mission=-1; //mission remove 
+		player.remining=0;
+		player.nextMissionAvailable[6]=-1;
+		return "success";
+	},
+},
+{
+	id:10070,
+
+	mission_start:(player,enemy)=>{
+		
+	},
+	mission_check:(player,enemy)=>{
+		mission[14].mission_success(player,enemy);
+	
+	
+	},
+	mission_fail:(player,enemy)=>{ // when violate the rule, or *discard* 
+		player.mission=-1; //mission remove 
+		player.remining=0;
+		return "fail";
+	},
+	mission_success:(player,enemy)=>{
+		player.state["undeath"]=true;
+		player.hp-=10; 
+		player.mission=-1; //mission remove 
+		player.remining=0;
+		
+		player.nextMissionAvailable[7]=-1;
+>>>>>>> d2aa68b5bdd9a801aa47fd3b73bb8f79b1e527ce
+		return "success";
+	},
+},
+{
+	id:10080,
+
+	mission_start:(player,enemy)=>{
+		
+	},
+	mission_check:(player,enemy)=>{
+		return mission[15].mission_success(player,enemy);
+		
+	
+	},
+	mission_fail:(player,enemy)=>{ // when violate the rule, or *discard* 
+		player.mission=-1; //mission remove 
+		player.remining=0;
+		return "fail";
+	},
+	mission_success:(player,enemy)=>{
+		player.state["suckBlood"]=true;
+		player.maxHp-=8;
+		player.hp = min(player.maxHp,player.hp); 
+		player.mission=-1; //mission remove 
+		player.remining=0;
+		player.nextMissionAvailable[8]=-1;
+		return "success";
+	},
+},
+{
+	id:10090,
+	
+	mission_start:(player,enemy)=>{
+		player.state["canPray"]=true;
+	},
+	mission_check:(player,enemy)=>{
+		
+		if(player.action.basic == "pray" && enemy.action.basic == "atk"){
+			return 	mission[16].mission_success(player,enemy);	
+		}
+		return "ongoing";
+	
+	},
+	mission_fail:(player,enemy)=>{ // when violate the rule, or *discard* 
+		player.mission=-1;
+		return "fail";
+	},
+	mission_success:(player,enemy)=>{
+		enemy.atk = Math.ceil(enemy.atk/2);
+		player.mission=-1; //mission remove 
+		player.nextMissionAvailable[9]=-1;
+		player.nextMissionAvailable[11]=0;
+		player.nextMissionAvailable[12]=0;
+		player.nextMissionAvailable[13]=0;
+		return "success";
+	},
+},
+{
+	id:10100,
+	
+	mission_start:(player,enemy)=>{
+		player.state["canPray"]=true;
+	},
+	mission_check:(player,enemy)=>{
+		
+		if(player.action.basic == "pray" && enemy.action.basic == "def"){
+			return 	mission[17].mission_success(player,enemy);	
+		}
+		return "ongoing";
+	
+	},
+	mission_fail:(player,enemy)=>{ // when violate the rule, or *discard* 
+		player.mission=-1;
+		return "fail";
+	},
+	mission_success:(player,enemy)=>{
+		enemy.def = Math.ceil(enemy.def/2);
+		player.mission=-1; //mission remove 
+		player.nextMissionAvailable[10]=-1;
+		player.nextMissionAvailable[11]=0;
+		player.nextMissionAvailable[12]=0;
+		player.nextMissionAvailable[13]=0;
+		return "success";
+	},
+},
+{
+	id:10110,
+	
+	mission_start:(player,enemy)=>{
+		
+	},
+	mission_check:(player,enemy)=>{
+		
+		if(player.action.basic == "pray"){
+			return 	mission[18].mission_success(player,enemy);	
+		}
+		return "ongoing";
+	
+	},
+	mission_fail:(player,enemy)=>{ // when violate the rule, or *discard* 
+		player.mission=-1;
+
+		return "fail";
+	},
+	mission_success:(player,enemy)=>{
+		player.prayHealth+=2;
+		player.mission=-1; //mission remove 
+		player.nextMissionAvailable[11]=-1;
+		return "success";
+	},
+},
+{
+	id:10120,
+	
+	mission_start:(player,enemy)=>{
+		player.remaining=3;
+	},
+	mission_check:(player,enemy)=>{
+		
+		if(player.action.basic == "pray"){
+			player.remaining-=1;
+			if(player.remaining==0){
+				return 	mission[19].mission_success(player,enemy);
+			}	
+		}
+		return "ongoing";
+	
+	},
+	mission_fail:(player,enemy)=>{ // when violate the rule, or *discard* 
+		player.mission=-1;
+		player.remining=0;
+		return "fail";
+	},
+	mission_success:(player,enemy)=>{
+		player.state["canRedBless"]=true;
+		player.mission=-1; //mission remove 
+		player.remining=0;
+		player.nextMissionAvailable[12]=-1;
+		player.nextMissionAvailable[13]=-1;
+		player.nextMissionAvailable[10]=-1;
+		return "success";
+	},
+},
+{
+	id:10130,
+	
+	mission_start:(player,enemy)=>{
+		player.remaining=3;
+	},
+	mission_check:(player,enemy)=>{
+		
+		if(player.action.basic == "pray"){
+			player.remaining-=1;
+			if(player.remaining==0){
+				return mission[20].mission_success(player,enemy);
+			}	
+		}
+		return "ongoing";
+	
+	},
+	mission_fail:(player,enemy)=>{ // when violate the rule, or *discard* 
+		player.mission=-1;
+		player.remining=0;
+		return "fail";
+	},
+	mission_success:(player,enemy)=>{
+		player.state["canBlueBless"]=true;
+		player.mission=-1; //mission remove 
+		player.remining=0;
+		player.nextMissionAvailable[12]=-1;
+		player.nextMissionAvailable[9]=-1;
+		player.nextMissionAvailable[13]=-1;
+		return "success";
+	},
+},
+
+{
+	id:10140,
+	
+	mission_start:(player,enemy)=>{
+		
+		player.tempObj["total_used"]=sumOfObj(player.itemRecord);
+	},
+	mission_check:(player,enemy)=>{
+		
+		if(sumOfObj(player.itemRecord)-player.tempObj["total_used"]>=5){
+			return mission[21].mission_success(player,enemy);
+		}
+		return "ongoing";
+	
+	},
+	mission_fail:(player,enemy)=>{ // when violate the rule, or *discard* 
+		player.mission=-1;
+		player.tempObj = {};
+		return "fail";
+	},
+	mission_success:(player,enemy)=>{
+
+		player.mission=-1; //mission remove 
+		player.tempObj = {};
+		player.nextMissionAvailable[14]=-1;
+
+		return "success";
+	},
+},
+
+{
+	id:10150,
+	
+	mission_start:(player,enemy)=>{
+		player.tempObj["knife"]=player.itemRecord[4];
+		player.tempObj["smoke"]=player.itemRecord[3];
+	},
+	mission_check:(player,enemy)=>{
+		
+	
+		if(player.itemRecord[4]-player.tempObj["knife"]>=1 && player.itemRecord[3]-player.tempObj["smoke"]){
+				return 	mission[22].mission_success(player,enemy);
+		}	
+		
+		return "ongoing";
+	
+	},
+	mission_fail:(player,enemy)=>{ // when violate the rule, or *discard* 
+		player.mission=-1;
+		player.tempObj = {};
+		return "fail";
+	},
+	mission_success:(player,enemy)=>{
+
+		player.mission=-1; //mission remove 
+		player.tempObj = {};
+		player.nextMissionAvailable[15]=-1;
+		player.state["thief"]=true;
+		return "success";
+	},
+},
+
 ]
 
 module.exports = mission;

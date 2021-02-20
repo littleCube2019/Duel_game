@@ -222,6 +222,16 @@ function itemAction(action, me, enemy)
   }
 }
 
+function playerStun(me, enemy){
+  if(typeof item[me.item].turn_end(me, enemy) !== "undefined"){
+    item[me.item].turn_end(me, enemy);
+    if(enemy.state.stun){
+      console.log("玩家" + enemy.id + "被擊暈");
+    }else{
+      console.log("玩家" + enemy.id + "沒有被擊暈");
+    }
+}
+
 function isGameOver(player1, player2){
   if(player1.hp<=0 || player2.hp<=0){
     if(player1.hp<player2.hp){
@@ -300,6 +310,11 @@ io.on('connection', (socket) => {
 
         player1.actionReady.basic = player1.actionReady.mission = player1.state.stun = false;
         player2.actionReady.basic = player2.actionReady.mission = player2.state.stun = false;
+
+        player1.state.stun = player2.state.stun = false;
+        playerStun(player1, player2);
+        playerStun(player2, player1);
+        io.emit("get_stuned", player1.state.stun, player2.state.stun);
       }
       
     }
