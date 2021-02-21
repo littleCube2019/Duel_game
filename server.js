@@ -272,8 +272,10 @@ function missionAction(action, me, enemy)
 {
   var state, card1Id, card2Id;
   if(action=="get" && !me.actionReady.mission){
-    card1Id = getRandomCard(me, "mission");
-    card2Id = getRandomCard(me, "item");
+    //card1Id = getRandomCard(me, "mission");
+    //card2Id = getRandomCard(me, "item");
+    card1Id = 10010;
+    card2Id = 20000;
     console.log("card1id:" + card1Id);
     console.log("card2id:" + card2Id);
     io.emit("choose_card", me.id,  missionCard[missionIdToIndex[card1Id]], itemCard[card2Id-20000]);
