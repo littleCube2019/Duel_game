@@ -165,20 +165,20 @@
 		});
 		socket.on("next_round", (player1, player2)=>{  //更新雙方血量
 			if(playerId==player1.id){
-				$("#my_hp").text(player1.hp);
+				$("#my_hp").text(player1.hp + "/" + player1.maxHp);
 				$("#my_atk").text(player1.atk);
 				$("#my_def").text(player1.def);
 				$("#my_crit").text(player1.crit_rate*100 + "%");
-				$("#enemy_hp").text(player2.hp);
+				$("#enemy_hp").text(player2.hp + "/" + player2.maxHp);
 				$("#enemy_atk").text(player2.atk);
 				$("#enemy_def").text(player2.def);
 				$("#enemy_crit").text(player2.crit_rate*100 + "%");
 			}else if(playerId==player2.id){
-				$("#my_hp").text(player2.hp);
+				$("#my_hp").text(player2.hp + "/" + player2.maxHp);
 				$("#my_atk").text(player2.atk);
 				$("#my_def").text(player2.def);
 				$("#my_crit").text(player2.crit_rate*100 + "%");
-				$("#enemy_hp").text(player1.hp);
+				$("#enemy_hp").text(player1.hp + "/" + player1.maxHp);
 				$("#enemy_atk").text(player1.atk);
 				$("#enemy_def").text(player1.def);
 				$("#enemy_crit").text(player1.crit_rate*100 + "%");
@@ -489,7 +489,7 @@
         <div id="my_basic-data">
         	<!--基本數值-->
 			<div>回合數: 第<span id="round"> 1 </span>回合</div>
-			<div>HP: <span id="my_hp"> 10 </span> </div>
+			<div>HP: <span id="my_hp"> 10/10 </span> </div>
             <div>ATK: <span id="my_atk"> 1 </span> </div>
 			<div>DEF: <span id="my_def"> 1 </span> </div>
 			<div>Critical: <span id="my_crit"> 50% </span> </div>
@@ -530,7 +530,7 @@
         <div id="enemy_basic-data">
         	<!--基本數值-->
 			<br>
-			<div>HP: <span id="enemy_hp"> 10 </span> </div>
+			<div>HP: <span id="enemy_hp"> 10/10 </span> </div>
             <div>ATK: <span id="enemy_atk"> 1 </span> </div>
 			<div>DEF: <span id="enemy_def"> 1 </span> </div>
 			<div>Critical: <span id="enemy_crit"> 50% </span> </div>

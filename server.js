@@ -253,16 +253,16 @@ function getRandomCard(player, type)
     main = 2;
   }
   if(main==1){
-    //sub = Math.floor(Math.random()*numOfSerialMission);
-    sub = 1;
+    sub = Math.floor(Math.random()*numOfSerialMission);
+    //sub = 2;
     if(player.nextMissionAvailable[sub]!=-1){
       card = main*10000 + sub*10 + player.nextMissionAvailable[sub];
     }else{
-      getRandomCard(player, "mission");
+      return getRandomCard(player, "mission");
     }
   }else if(main==2){
-    //sub = Math.floor(Math.random()*numOfItem);
-    sub = 2;
+    sub = Math.floor(Math.random()*numOfItem);
+    //sub = 1;
     card = main*10000 + sub;
   }
   console.log(main,sub,player.nextMissionAvailable[sub]);
