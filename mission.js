@@ -695,11 +695,11 @@ var mission = [
 	id:10140,
 	
 	mission_start:(player,enemy)=>{
-
+		player.remianing=5;
 		player.tempObj["total_used"]=sumOfObj(player.itemRecord);
 	},
 	mission_check:(player,enemy)=>{
-		
+		player.remaining = player.tempObj["total_used"] - sumOfObj(player.itemRecord) +5;
 		if(sumOfObj(player.itemRecord)-player.tempObj["total_used"]>=5){
 			return mission[21].mission_success(player,enemy);
 		}
@@ -708,11 +708,12 @@ var mission = [
 	},
 	mission_fail:(player,enemy)=>{ // when violate the rule, or *discard* 
 		player.mission=-1;
+		player.remaining = 0;
 		player.tempObj = {};
 		return "fail";
 	},
 	mission_success:(player,enemy)=>{
-
+		player.remaining =	0;
 		player.mission=-1; //mission remove 
 		player.tempObj = {};
 		player.nextMissionAvailable[14]=-1;
