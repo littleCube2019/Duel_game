@@ -313,7 +313,7 @@ function missionAction(action, me, enemy)
   }
 }
 
-function itemAction(action, me, enemy)
+function itemAction(action, me, enemy) //回合結束才結算
 {
   if(me.item>=0){
     if(action=="use"){
@@ -367,7 +367,7 @@ function isUndeath(pl)
 //=====================================狀態:bless==================================================
 function bless(me, type)
 {
-  if(type=="start"){
+  if(type=="start" && me.prayRemaining==0){
     if(me.state.canRedBless){
       me.atk += 2;
       me.prayRemaining = 4;
@@ -560,7 +560,7 @@ io.on('connection', (socket) => {
         player2.actionReady.basic = player2.actionReady.mission = player2.state.stun = false;
 
 //====================================================狀態:stun, snail, canpray======================================================================
-         playerStun(player1, player2);
+        playerStun(player1, player2);
         playerStun(player2, player1);  
         io.emit("player_state", player1.id, player1.state.stun, player1.state.sprite_snail, player1.state.canPray);
         io.emit("player_state", player2.id, player2.state.stun, player2.state.sprite_snail, player2.state.canPray);
