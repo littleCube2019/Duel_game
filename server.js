@@ -320,9 +320,9 @@ function itemAction(action, me, enemy)
     }else if(action=="discard_2"){
       item[me.item2].discard(me, enemy);
     }
-    io.emit("item_state", me, item[me.item], action);
+    io.emit("item_state", me, item[me.item], action,me.equip);
   }else{
-    io.emit("item_state", me, 0, "no_item");
+    io.emit("item_state", me, 0, "no_item",me.equip);
   }
 }
 
