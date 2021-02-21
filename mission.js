@@ -97,6 +97,7 @@ var mission = [
 		return "fail";
 	},
 	mission_success:(player,enemy)=>{
+		console.log(player.id+"完成銅牆鐵壁");
 		player.def+=1;
 		player.mission=-1; //mission remove 
 		player.remining=0;

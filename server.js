@@ -59,7 +59,7 @@ class player {
 	constructor(playerId){
 			// 以一個基本初始玩家為預設值
   this.id = playerId;  //區分玩家
-  this.hp = 4; //血量 
+  this.hp = 10; //血量 
   this.maxHp = 10; // 最大血量
   this.atk = 1; //攻擊力
   this.def = 1; //防禦力
@@ -253,14 +253,16 @@ function getRandomCard(player, type)
     main = 2;
   }
   if(main==1){
-    sub = Math.floor(Math.random()*numOfSerialMission);
+    //sub = Math.floor(Math.random()*numOfSerialMission);
+    sub = 1;
     if(player.nextMissionAvailable[sub]!=-1){
       card = main*10000 + sub*10 + player.nextMissionAvailable[sub];
     }else{
       getRandomCard(player, "mission");
     }
   }else if(main==2){
-    sub = Math.floor(Math.random()*numOfItem);
+    //sub = Math.floor(Math.random()*numOfItem);
+    sub = 2;
     card = main*10000 + sub;
   }
   console.log(main,sub,player.nextMissionAvailable[sub]);
@@ -272,10 +274,8 @@ function missionAction(action, me, enemy)
 {
   var state, card1Id, card2Id;
   if(action=="get" && !me.actionReady.mission){
-    //card1Id = getRandomCard(me, "mission");
-    //card2Id = getRandomCard(me, "item");
-    card1Id = 10010;
-    card2Id = 20000;
+    card1Id = getRandomCard(me, "mission");
+    card2Id = getRandomCard(me, "item");
     console.log("card1id:" + card1Id);
     console.log("card2id:" + card2Id);
     io.emit("choose_card", me.id,  missionCard[missionIdToIndex[card1Id]], itemCard[card2Id-20000]);
@@ -540,8 +540,6 @@ io.on('connection', (socket) => {
       player1.takeDamage(p2top1);
       player2.takeDamage(p1top2);
       //血量判定
-      io.emit("dmg", p1top2, p2top1, player1.action.basic, player2.action.basic);
-      io.emit("next_round", player1, player2);
 
       //=======================================================判斷輸贏================================================================
       if(!isGameOver(player1, player2)){
@@ -581,7 +579,8 @@ io.on('connection', (socket) => {
           io.emit("second_item_show", player2.id);
         }
         //==================================================================================================================
-
+        io.emit("dmg", p1top2, p2top1, player1.action.basic, player2.action.basic);
+        io.emit("next_round", player1, player2);
         //=====================================================狀態總結======================================================
         console.log("玩家1狀態 暈眩:"+player1.state.rage+"不死:"+player1.state.undeath+"吸血:"+player1.state.suckBlood+"盾精靈:"+player1.state.sprite_sacrifice
                     +"蝸精靈:"+player1.state.sprite_snail+"祈禱:"+player1.state.canPray+"赤紅:"+player1.state.canRedBless+"靛藍:"+player1.state.canBlueBless
@@ -589,6 +588,8 @@ io.on('connection', (socket) => {
         console.log("玩家2狀態 暈眩:"+player2.state.rage+"不死:"+player2.state.undeath+"吸血:"+player2.state.suckBlood+"盾精靈:"+player2.state.sprite_sacrifice
                     +"蝸精靈:"+player2.state.sprite_snail+"祈禱:"+player2.state.canPray+"赤紅:"+player2.state.canRedBless+"靛藍:"+player2.state.canBlueBless
                     +"2道具:"+player2.state.secondItem+"小偷:"+player2.state.thief);
+        console.log(player1);
+        console.log(player2);
       }
 
     }
