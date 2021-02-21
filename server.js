@@ -540,6 +540,8 @@ io.on('connection', (socket) => {
       player1.takeDamage(p2top1);
       player2.takeDamage(p1top2);
       //血量判定
+      io.emit("dmg", p1top2, p2top1, player1.action.basic, player2.action.basic);
+     
 
       //=======================================================判斷輸贏================================================================
       if(!isGameOver(player1, player2)){
@@ -579,8 +581,7 @@ io.on('connection', (socket) => {
           io.emit("second_item_show", player2.id);
         }
         //==================================================================================================================
-        io.emit("dmg", p1top2, p2top1, player1.action.basic, player2.action.basic);
-        io.emit("next_round", player1, player2);
+         io.emit("next_round", player1, player2);
         //=====================================================狀態總結======================================================
         console.log("玩家1狀態 暈眩:"+player1.state.rage+"不死:"+player1.state.undeath+"吸血:"+player1.state.suckBlood+"盾精靈:"+player1.state.sprite_sacrifice
                     +"蝸精靈:"+player1.state.sprite_snail+"祈禱:"+player1.state.canPray+"赤紅:"+player1.state.canRedBless+"靛藍:"+player1.state.canBlueBless

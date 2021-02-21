@@ -321,11 +321,13 @@
 
 			//選擇道具
 			$("#item_use").click(()=>{
+
 				player_act.item = "use";
 				addMessage("你選擇使用道具1");
 			});
 			$("#item_discard").click(()=>{
 				player_act.item = "discard";
+
 				addMessage("你選擇丟棄道具1");
 			})
 
@@ -594,19 +596,19 @@
     		<div id="turn_action" class="interact-sector">
     		本回合行動
 
-    			<div>
-    			<button id="action_atk" class="interact-button"> 攻擊 </button>
+    			<div id="action_atk">
+    			<button  class="interact-button"> 攻擊 </button>
     			此回合攻擊對方，有機會造成爆擊
     			</div>
 
-    			<div>
-				<button id="action_def" class="interact-button">防禦</button>
+    			<div id="action_def">
+				<button  class="interact-button">防禦</button>
 				此回合提升50%防禦力
 				</div>      
 				
-				<div>
-				<button id="action_pray" class="interact-button">祈禱</button>
-				祈禱的敘述(待補)
+				<div id="action_pray">
+				<button  class="interact-button">祈禱</button>
+				向自己相信的神祈禱
 				</div> 
 
 				<div>
