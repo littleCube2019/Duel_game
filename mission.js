@@ -695,7 +695,7 @@ var mission = [
 	id:10140,
 	
 	mission_start:(player,enemy)=>{
-		
+
 		player.tempObj["total_used"]=sumOfObj(player.itemRecord);
 	},
 	mission_check:(player,enemy)=>{
@@ -725,6 +725,7 @@ var mission = [
 	id:10150,
 	
 	mission_start:(player,enemy)=>{
+
 		player.tempObj["knife"]=player.itemRecord[4];
 		player.tempObj["smoke"]=player.itemRecord[3];
 	},
