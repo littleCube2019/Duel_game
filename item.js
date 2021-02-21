@@ -80,6 +80,7 @@ var item = [
 	id:5,
 
 	use:(player,enemy)=>{
+		equip=true;
 	},
 
 
@@ -93,6 +94,7 @@ var item = [
 	discard:(player,enemy)=>{
 		player.item = -1;
 		enemy.state["stun"] = false;
+		equip=false;
 	},
 
 }

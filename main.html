@@ -125,16 +125,22 @@
 			}
 		})
 
-		socket.on("item_state", (player, card, type)=>{
+		socket.on("item_state", (player, card, type,equip)=>{
 			if(playerId==player.id){
 				if(type=="get"){
 					addMessage("你抽到了一個道具" + card.id);
 					$("#my_item").text("當前道具: " + card.name);
 					$("#my_item_content").text(card.description);
 				}else if(type=="use"){
-					addMessage("你使用了道具");
-					$("#my_item").text("當前道具: ");
-					$("#my_item_content").text("");
+					if(equip==false){
+						addMessage("你使用了道具");
+						$("#my_item").text("當前道具: ");
+						$("#my_item_content").text("");
+					}
+
+					else{
+						addMessage("你裝備了道具");
+					}
 				}else if(type=="discard"){
 					addMessage("你丟棄用了道具");
 					$("#my_item").text("當前道具: ");
@@ -379,7 +385,7 @@
 
 			$("#item_sub_accept_1").click(()=>{
 				$("#item_sub_pop").hide();
-				console.log("water in fire whyyy?")
+				
 				$("#my_item").text("當前道具: " + tempItemCard.name);
 				$("#my_item_content").text(tempItemCard.description);
 				addMessage("你將偷來的對方道具放入自己口袋之中");
