@@ -59,7 +59,7 @@ class player {
 	constructor(playerId){
 			// 以一個基本初始玩家為預設值
   this.id = playerId;  //區分玩家
-  this.hp = 4; //血量 
+  this.hp = 10; //血量 
   this.maxHp = 10; // 最大血量
   this.atk = 1; //攻擊力
   this.def = 1; //防禦力
@@ -254,13 +254,15 @@ function getRandomCard(player, type)
   }
   if(main==1){
     sub = Math.floor(Math.random()*numOfSerialMission);
+    //sub = 2;
     if(player.nextMissionAvailable[sub]!=-1){
       card = main*10000 + sub*10 + player.nextMissionAvailable[sub];
     }else{
-      getRandomCard(player, "mission");
+      return getRandomCard(player, "mission");
     }
   }else if(main==2){
     sub = Math.floor(Math.random()*numOfItem);
+    //sub = 1;
     card = main*10000 + sub;
   }
   console.log(main,sub,player.nextMissionAvailable[sub]);
@@ -587,6 +589,8 @@ io.on('connection', (socket) => {
         console.log("玩家2狀態 暈眩:"+player2.state.rage+"不死:"+player2.state.undeath+"吸血:"+player2.state.suckBlood+"盾精靈:"+player2.state.sprite_sacrifice
                     +"蝸精靈:"+player2.state.sprite_snail+"祈禱:"+player2.state.canPray+"赤紅:"+player2.state.canRedBless+"靛藍:"+player2.state.canBlueBless
                     +"2道具:"+player2.state.secondItem+"小偷:"+player2.state.thief);
+        console.log(player1);
+        console.log(player2);
       }
 
     }
