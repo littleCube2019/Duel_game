@@ -318,7 +318,7 @@ function itemAction(action, me, enemy) //回合結束才結算
   if(me.item>=0){
     if(action=="use"){
       item[me.item].use(me, enemy);
-      me.itemRecord[me.item-20000] += 1;
+      me.itemRecord[me.item] += 1;
     }else if(action=="discard"){
       item[me.item].discard(me, enemy);
     }else if(action=="use_2"){
