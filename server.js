@@ -583,12 +583,6 @@ io.on('connection', (socket) => {
         //==================================================================================================================
          io.emit("next_round", player1, player2);
         //=====================================================狀態總結======================================================
-        console.log("玩家1狀態 暈眩:"+player1.state.rage+"不死:"+player1.state.undeath+"吸血:"+player1.state.suckBlood+"盾精靈:"+player1.state.sprite_sacrifice
-                    +"蝸精靈:"+player1.state.sprite_snail+"祈禱:"+player1.state.canPray+"赤紅:"+player1.state.canRedBless+"靛藍:"+player1.state.canBlueBless
-                    +"2道具:"+player1.state.secondItem+"小偷:"+player1.state.thief);
-        console.log("玩家2狀態 暈眩:"+player2.state.rage+"不死:"+player2.state.undeath+"吸血:"+player2.state.suckBlood+"盾精靈:"+player2.state.sprite_sacrifice
-                    +"蝸精靈:"+player2.state.sprite_snail+"祈禱:"+player2.state.canPray+"赤紅:"+player2.state.canRedBless+"靛藍:"+player2.state.canBlueBless
-                    +"2道具:"+player2.state.secondItem+"小偷:"+player2.state.thief);
         console.log(player1);
         console.log(player2);
       }
