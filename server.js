@@ -182,7 +182,10 @@ class player {
      //==============================================狀態:suckblood===================================
      if(this.state.suckBlood){
       console.log("玩家" + this.id + "觸發suckblood");
-      this.hp = Math.max(this.maxHp, this.hp + enemy.takenDamage.normal);
+      this.hp = this.hp + Math.ceil(enemy.takenDamage.normal*0.5);
+      if(this.hp>this.maxHp){
+        this.hp = this.maxHp;
+      }
     }
     //=================================================================================================
 
@@ -315,6 +318,7 @@ function itemAction(action, me, enemy)
   if(me.item>=0){
     if(action=="use"){
       item[me.item].use(me, enemy);
+      me.itemRecord[me.item-20000] += 1;
     }else if(action=="discard"){
       item[me.item].discard(me, enemy);
     }else if(action=="use_2"){
@@ -349,7 +353,8 @@ function isUndeath(pl)
   if(pl.hp<=0){
     if(pl.state.undeath){
       if(pl.maxHp>1){
-        pl.hp = Math.ceil(pl.maxHp/2);
+        pl.maxHp = Math.ceil(pl.maxHp/2);
+        pl.hp = pl.maxHp;
         pl.atk = Math.max(1, pl.atk-1);
         console.log("玩家" + pl.id + "觸發了不死");
       }
