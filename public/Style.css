@@ -37,6 +37,7 @@
 }
 
 .status_content{
+
 	border-style:solid;
 	width:80%;
 	height:15%;
@@ -53,7 +54,7 @@
 .choice_button{
 
 	
-	height: 5%;
+	height: 8%;
 	width: 20%;
 }
 
