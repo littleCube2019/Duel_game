@@ -133,6 +133,7 @@
 					$("#my_item_content").text(card.description);
 				}else if(type=="use"){
 					if(equip==false){
+						
 						addMessage("你使用了道具");
 						$("#my_item").text("當前道具: ");
 						$("#my_item_content").text("");
@@ -145,7 +146,7 @@
 					addMessage("你丟棄用了道具");
 					$("#my_item").text("當前道具: ");
 					$("#my_item_content").text("");
-				}else if(type=="no_card"){
+				}else if(type=="no_item"){
 					addMessage("你沒有道具");
 				}
 			}

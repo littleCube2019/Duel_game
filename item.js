@@ -46,7 +46,7 @@ var item = [
 	id:3,
 	
 	use:(player,enemy)=>{
-		player.def+=2;
+
 		
 
 		for(var k in player.takenDamage){
@@ -80,7 +80,9 @@ var item = [
 	id:5,
 
 	use:(player,enemy)=>{
-		equip=true;
+		
+		player.equip=true;
+		
 	},
 
 

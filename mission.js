@@ -548,7 +548,9 @@ var mission = [
 	id:10090,
 	
 	mission_start:(player,enemy)=>{
+		player.remining=1;
 		player.state["canPray"]=true;
+
 	},
 	mission_check:(player,enemy)=>{
 		
@@ -559,8 +561,11 @@ var mission = [
 	
 	},
 	mission_fail:(player,enemy)=>{ // when violate the rule, or *discard* 
+		player.remining=0;
 		player.mission=-1;
+		player.state["canPray"]=false;
 		return "fail";
+	
 	},
 	mission_success:(player,enemy)=>{
 		enemy.atk = Math.ceil(enemy.atk/2);
@@ -569,6 +574,7 @@ var mission = [
 		player.nextMissionAvailable[11]=0;
 		player.nextMissionAvailable[12]=0;
 		player.nextMissionAvailable[13]=0;
+		player.remining=0;
 		return "success";
 	},
 },
@@ -577,6 +583,8 @@ var mission = [
 	
 	mission_start:(player,enemy)=>{
 		player.state["canPray"]=true;
+		player.remining=0;
+
 	},
 	mission_check:(player,enemy)=>{
 		
@@ -588,6 +596,8 @@ var mission = [
 	},
 	mission_fail:(player,enemy)=>{ // when violate the rule, or *discard* 
 		player.mission=-1;
+		player.remining=0;
+		player.state["canPray"]=false;
 		return "fail";
 	},
 	mission_success:(player,enemy)=>{
@@ -597,6 +607,7 @@ var mission = [
 		player.nextMissionAvailable[11]=0;
 		player.nextMissionAvailable[12]=0;
 		player.nextMissionAvailable[13]=0;
+		player.remining=0;
 		return "success";
 	},
 },

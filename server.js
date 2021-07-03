@@ -537,14 +537,17 @@ io.on('connection', (socket) => {
       if(!player1.state.stun){
         player1.totalDamage();
         p1top2 = player1.realDamage(player2);
+        player2.takeDamage(p1top2);
+        
       }
-      if(!player2.sprite.stun){
+      if(!player2.state.stun){
         player2.totalDamage();
         p2top1 = player2.realDamage(player1);
+        player1.takeDamage(p2top1);
       }
       //========================================================傷害結算===============================================================
-      player1.takeDamage(p2top1);
-      player2.takeDamage(p1top2);
+      
+     
       //血量判定
       io.emit("dmg", p1top2, p2top1, player1.action.basic, player2.action.basic);
      
